@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "dgSpecHash": "bH642g8pMd4=",
+  "success": true,
+  "projectFilePath": "D:\\Nexcom\\Firmware\\01_Project\\02_Tester\\TR28386_T\\TR28386_T\\TR28386_T_PC\\TR28386_T_PC.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.4\\microsoft.netcore.platforms.3.1.4.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.android-arm.runtime.native.system.io.ports\\10.0.5\\runtime.android-arm.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.android-arm64.runtime.native.system.io.ports\\10.0.5\\runtime.android-arm64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.android-x64.runtime.native.system.io.ports\\10.0.5\\runtime.android-x64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.android-x86.runtime.native.system.io.ports\\10.0.5\\runtime.android-x86.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-arm.runtime.native.system.io.ports\\10.0.5\\runtime.linux-arm.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-arm64.runtime.native.system.io.ports\\10.0.5\\runtime.linux-arm64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-bionic-arm64.runtime.native.system.io.ports\\10.0.5\\runtime.linux-bionic-arm64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-bionic-x64.runtime.native.system.io.ports\\10.0.5\\runtime.linux-bionic-x64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-musl-arm.runtime.native.system.io.ports\\10.0.5\\runtime.linux-musl-arm.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-musl-arm64.runtime.native.system.io.ports\\10.0.5\\runtime.linux-musl-arm64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-musl-x64.runtime.native.system.io.ports\\10.0.5\\runtime.linux-musl-x64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.linux-x64.runtime.native.system.io.ports\\10.0.5\\runtime.linux-x64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.maccatalyst-arm64.runtime.native.system.io.ports\\10.0.5\\runtime.maccatalyst-arm64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.maccatalyst-x64.runtime.native.system.io.ports\\10.0.5\\runtime.maccatalyst-x64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.native.system.io.ports\\10.0.5\\runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.osx-arm64.runtime.native.system.io.ports\\10.0.5\\runtime.osx-arm64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\runtime.osx-x64.runtime.native.system.io.ports\\10.0.5\\runtime.osx-x64.runtime.native.system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\scottplot\\4.1.71\\scottplot.4.1.71.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\scottplot.winforms\\4.1.71\\scottplot.winforms.4.1.71.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\system.drawing.common\\4.7.2\\system.drawing.common.4.7.2.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\system.io.ports\\10.0.5\\system.io.ports.10.0.5.nupkg.sha512",
+    "C:\\Users\\Kim Jeonghwan\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
