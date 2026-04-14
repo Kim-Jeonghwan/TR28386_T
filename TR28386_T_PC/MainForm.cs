@@ -1,3 +1,9 @@
+/**********************************************************************
+    Nexcom Co., Ltd.
+    Filename         : MainForm.cs
+    Description      : TR28386_T Monitoring & Dashboard Main Form
+    Last Updated     : 2026. 04. 14.
+**********************************************************************/
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -52,7 +58,7 @@ namespace TR28386_T_PC
         private TrackBar trbEpwmDuty;
         private Label lblEpwmDutyVal;
         private ComboBox cmbEpwmFreq;
-        
+
         private TextBox txtEepAddr;
         private TextBox txtEepData;
         private Button btnEepWrite;
@@ -83,7 +89,11 @@ namespace TR28386_T_PC
         public MainForm()
         {
             this.Text = "TR28386_T Monitoring & Dashboard";
-            this.Size = new Size(2100, 1275);
+            this.Size = new Size(2100, 1250);
+            this.MaximumSize = this.Size;
+            this.MinimumSize = this.Size;
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.AutoScroll = true; // Allows scroll on small monitors
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = colorBg;
@@ -96,7 +106,7 @@ namespace TR28386_T_PC
             _protocol.OnStatusReceived += OnStatusReceived;
             _protocol.OnCommError += OnCommError;
             _protocol.OnPortClosed += () => Invoke((Action)UpdateConnectButtons);
-            
+
             _protocol.OnRawTx += OnRawTxReceived;
             _protocol.OnRawRx += OnRawRxReceived;
 
@@ -116,7 +126,7 @@ namespace TR28386_T_PC
                 Padding = new Padding(15)
             };
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 195)); // Comm row
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 360)); // Status row
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 380)); // Status row (+20)
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 390)); // Control row
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110)); // Log row (Reduced from 160)
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 675));
@@ -131,10 +141,14 @@ namespace TR28386_T_PC
 
             // Labels
             Label lblPort = new Label { Text = "COM Port", Location = new Point(20, 50), AutoSize = true, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
-            cmbPorts = new ComboBox { 
-                Location = new Point(160, 48), Width = 150,
-                BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.FromArgb(0, 255, 200), 
-                DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("맑은 고딕", 11, FontStyle.Regular)
+            cmbPorts = new ComboBox
+            {
+                Location = new Point(160, 48),
+                Width = 150,
+                BackColor = Color.FromArgb(45, 45, 48),
+                ForeColor = Color.FromArgb(0, 255, 200),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("맑은 고딕", 11, FontStyle.Regular)
             };
             UpdatePortsList();
             cmbPorts.Click += (s, e) => UpdatePortsList();
@@ -146,10 +160,14 @@ namespace TR28386_T_PC
             lblCommReceiving = new Label { Text = "● 통신 수신중", Location = new Point(720, 50), AutoSize = true, ForeColor = Color.Gray, Font = new Font("맑은 고딕", 11, FontStyle.Bold) };
 
             Label lblBaud = new Label { Text = "Baud Rate", Location = new Point(20, 120), AutoSize = true, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
-            cmbBauds = new ComboBox { 
-                Location = new Point(160, 118), Width = 150,
-                BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.FromArgb(0, 255, 200), 
-                DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("맑은 고딕", 11, FontStyle.Regular)
+            cmbBauds = new ComboBox
+            {
+                Location = new Point(160, 118),
+                Width = 150,
+                BackColor = Color.FromArgb(45, 45, 48),
+                ForeColor = Color.FromArgb(0, 255, 200),
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("맑은 고딕", 11, FontStyle.Regular)
             };
             cmbBauds.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200", "230400", "460800" });
             cmbBauds.SelectedItem = "115200";
@@ -163,8 +181,8 @@ namespace TR28386_T_PC
             btnInit = CreateBorderedButton("초기화", 560, 115, 100, 50);
             btnInit.Click += (s, e) => _protocol.ReInit();
 
-            pnlComm.Controls.AddRange(new Control[] { 
-                lblPort, lblBaud, cmbPorts, cmbBauds, btnRefresh, 
+            pnlComm.Controls.AddRange(new Control[] {
+                lblPort, lblBaud, cmbPorts, cmbBauds, btnRefresh,
                 btnConnect, btnDisconnect, btnInit,
                 lblPortConnected, lblCommReceiving
             });
@@ -183,18 +201,18 @@ namespace TR28386_T_PC
 
             lblEncoderAngle = CreateLabelValue("EncoderAngle:", "", 30, 95, pnlStatus);
             lblEncoderRawPD = CreateLabelValue("EncoderRawPD:", "", 700, 95, pnlStatus);
-            
+
             lblPWMRaw = CreateLabelValue("PWMRaw:", "", 30, 150, pnlStatus);
             lblPWMRCLPF = CreateLabelValue("PWMRCLPF:", "", 700, 150, pnlStatus);
-            
+
             lblPWMBWLPF = CreateLabelValue("PWMBWLPF:", "", 30, 205, pnlStatus);
             lblPotenRAW = CreateLabelValue("PotenRAW:", "", 700, 205, pnlStatus);
-            
+
             lblPotenMAVE = CreateLabelValue("PotenMAVE:", "", 30, 260, pnlStatus);
             lblEepromReadValStatus = CreateLabelValue("EepromReadVal (Hex):", "", 700, 260, pnlStatus);
-            
+
             lblIncNumber = CreateLabelValue("Seq (IncNumber):", "", 30, 315, pnlStatus);
-            
+
             pnlStatus.Height = 270;
 
             // Control LED panel
@@ -213,9 +231,10 @@ namespace TR28386_T_PC
 
             cy = 195;
             chkEpwm7a = new CheckBox { Text = "Epwm7a Target Enable", Location = new Point(30, cy), AutoSize = true, ForeColor = Color.FromArgb(0, 190, 255), Font = new Font("맑은 고딕", 11, FontStyle.Bold) };
-            chkEpwm7a.CheckedChanged += (s, e) => {
-                _ctrlDto.Epwm7aEn = chkEpwm7a.Checked; 
-                if(_ctrlDto.Epwm7aEn) SendControlMessage(); 
+            chkEpwm7a.CheckedChanged += (s, e) =>
+            {
+                _ctrlDto.Epwm7aEn = chkEpwm7a.Checked;
+                if (_ctrlDto.Epwm7aEn) SendControlMessage();
             };
             pnlCtrls.Controls.Add(chkEpwm7a);
 
@@ -223,10 +242,11 @@ namespace TR28386_T_PC
             Label lblDuty = new Label { Text = "Duty(1~100):", Location = new Point(30, cy + 5), AutoSize = true };
             trbEpwmDuty = new TrackBar { Minimum = 1, Maximum = 100, Value = 50, Location = new Point(180, cy), Width = 225, TickStyle = TickStyle.None };
             lblEpwmDutyVal = new Label { Text = "50", Location = new Point(420, cy + 5), Width = 50, Font = new Font("Consolas", 12, FontStyle.Bold) };
-            trbEpwmDuty.Scroll += (s, e) => { 
-                lblEpwmDutyVal.Text = trbEpwmDuty.Value.ToString(); 
-                _ctrlDto.Epwm7aDuty = (byte)trbEpwmDuty.Value; 
-                if(_ctrlDto.Epwm7aEn) SendControlMessage();
+            trbEpwmDuty.Scroll += (s, e) =>
+            {
+                lblEpwmDutyVal.Text = trbEpwmDuty.Value.ToString();
+                _ctrlDto.Epwm7aDuty = (byte)trbEpwmDuty.Value;
+                if (_ctrlDto.Epwm7aEn) SendControlMessage();
             };
             _ctrlDto.Epwm7aDuty = (byte)trbEpwmDuty.Value;
             pnlCtrls.Controls.Add(lblDuty);
@@ -235,22 +255,26 @@ namespace TR28386_T_PC
 
             cy = 320;
             Label lblFreq = new Label { Text = "Freq:", Location = new Point(30, cy + 5), AutoSize = true };
-            cmbEpwmFreq = new ComboBox { 
-                Location = new Point(180, cy), Width = 225, 
-                BackColor = Color.FromArgb(45, 45, 48), ForeColor = Color.FromArgb(0, 255, 200), 
-                DropDownStyle = ComboBoxStyle.DropDownList, 
+            cmbEpwmFreq = new ComboBox
+            {
+                Location = new Point(180, cy),
+                Width = 225,
+                BackColor = Color.FromArgb(45, 45, 48),
+                ForeColor = Color.FromArgb(0, 255, 200),
+                DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("맑은 고딕", 10)
             };
             cmbEpwmFreq.Items.AddRange(new object[] { "10Hz (0)", "100Hz (1)", "1kHz (2)", "10kHz (3)", "100kHz (4)", "1MHz (5)", "10MHz (6)" });
             cmbEpwmFreq.SelectedIndex = 2; // default 1kHz
-            cmbEpwmFreq.SelectedIndexChanged += (s, e) => {
+            cmbEpwmFreq.SelectedIndexChanged += (s, e) =>
+            {
                 _ctrlDto.Epwm7aFreq = (byte)cmbEpwmFreq.SelectedIndex;
-                if(_ctrlDto.Epwm7aEn) SendControlMessage();
+                if (_ctrlDto.Epwm7aEn) SendControlMessage();
             };
             _ctrlDto.Epwm7aFreq = (byte)cmbEpwmFreq.SelectedIndex;
             pnlCtrls.Controls.Add(lblFreq);
             pnlCtrls.Controls.Add(cmbEpwmFreq);
-            
+
             pnlCtrls.Height = 350;
 
 
@@ -260,21 +284,21 @@ namespace TR28386_T_PC
             int ey = 90;
 
             pnlEep.Controls.Add(new Label { Text = "EepAddr (Hex):", Location = new Point(35, ey), AutoSize = true });
-            txtEepAddr = new TextBox { Location = new Point(210, ey-2), Width=135, BackColor = Color.FromArgb(60,60,60), ForeColor=Color.White, Text="0000", BorderStyle = BorderStyle.FixedSingle, Font=new Font("Consolas", 11) };
+            txtEepAddr = new TextBox { Location = new Point(210, ey - 2), Width = 135, BackColor = Color.FromArgb(60, 60, 60), ForeColor = Color.White, Text = "0000", BorderStyle = BorderStyle.FixedSingle, Font = new Font("Consolas", 11) };
             pnlEep.Controls.Add(txtEepAddr);
 
-            pnlEep.Controls.Add(new Label { Text = "EepData (Hex):", Location = new Point(35, ey+75), AutoSize = true });
-            txtEepData = new TextBox { Location = new Point(210, ey+73), Width=135, BackColor = Color.FromArgb(60, 60, 60), ForeColor = Color.White, Text="00", BorderStyle = BorderStyle.FixedSingle, Font=new Font("Consolas", 11) };
+            pnlEep.Controls.Add(new Label { Text = "EepData (Hex):", Location = new Point(35, ey + 75), AutoSize = true });
+            txtEepData = new TextBox { Location = new Point(210, ey + 73), Width = 135, BackColor = Color.FromArgb(60, 60, 60), ForeColor = Color.White, Text = "00", BorderStyle = BorderStyle.FixedSingle, Font = new Font("Consolas", 11) };
             pnlEep.Controls.Add(txtEepData);
 
-            btnEepWrite = CreateBorderedButton("Write", 375, ey-3, 135, 50);
+            btnEepWrite = CreateBorderedButton("Write", 375, ey - 3, 135, 50);
             btnEepWrite.Click += (s, e) => DoEepWrite();
             pnlEep.Controls.Add(btnEepWrite);
 
-            btnEepRead = CreateBorderedButton("Read", 375, ey+70, 135, 50);
+            btnEepRead = CreateBorderedButton("Read", 375, ey + 70, 135, 50);
             btnEepRead.Click += (s, e) => DoEepRead();
             pnlEep.Controls.Add(btnEepRead);
-            
+
             pnlEep.Height = 350;
 
 
@@ -291,21 +315,22 @@ namespace TR28386_T_PC
 
             lblLogRxInfo = new Label { Location = new Point(30, 55), AutoSize = true, Font = new Font("Consolas", 11, FontStyle.Bold), ForeColor = Color.Lime };
             lblLogTxInfo = new Label { Location = new Point(30, 115), AutoSize = true, Font = new Font("Consolas", 11, FontStyle.Bold), ForeColor = Color.Yellow };
-            
+
             Button btnLogDetail = CreateBorderedButton("로그 상세 보기\n(6K History)", 0, 45, 300, 90);
             btnLogDetail.Anchor = AnchorStyles.Right | AnchorStyles.Top;
-            btnLogDetail.Click += (s, e) => {
+            btnLogDetail.Click += (s, e) =>
+            {
                 if (_logForm.IsDisposed) _logForm = new LogForm();
                 _logForm.Show();
                 _logForm.BringToFront();
             };
-            
+
             pnlLog.Controls.Add(lblLogRxInfo);
             pnlLog.Controls.Add(lblLogTxInfo);
             pnlLog.Controls.Add(btnLogDetail);
-            
+
             // Assign dynamic location for button in Resize
-            pnlLog.Resize += (s,e) => { btnLogDetail.Location = new Point(pnlLog.Width - 330, 45); };
+            pnlLog.Resize += (s, e) => { btnLogDetail.Location = new Point(pnlLog.Width - 330, 45); };
 
             mainLayout.Controls.Add(pnlLog, 0, 3);
             mainLayout.SetColumnSpan(pnlLog, 3);
@@ -315,13 +340,16 @@ namespace TR28386_T_PC
             pnlGraph.Dock = DockStyle.Fill;
             pnlGraph.Margin = new Padding(5);
 
-            _formsPlot = new FormsPlot { Location = new Point(15, 45), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom };
-            _formsPlot.Size = new Size(pnlGraph.Width - 30, pnlGraph.Height - 185);
+            pnlGraph.Padding = new Padding(15, 45, 15, 150); // Bottom margin 300
+            pnlGraph.Margin = new Padding(5);
+ 
+            _formsPlot = new FormsPlot { Dock = DockStyle.Fill };
             pnlGraph.Controls.Add(_formsPlot);
-            
-                Button btnToggleGraph = CreateBorderedButton("Pause", 30, pnlGraph.Height - 120, 120, 50);
+
+            Button btnToggleGraph = CreateBorderedButton("Pause", 30, pnlGraph.Height - 120, 120, 50);
             btnToggleGraph.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnToggleGraph.Click += (s, e) => {
+            btnToggleGraph.Click += (s, e) =>
+            {
                 _isGraphPaused = !_isGraphPaused;
                 btnToggleGraph.Text = _isGraphPaused ? "Resume" : "Pause";
                 btnToggleGraph.BackColor = _isGraphPaused ? Color.Orange : Color.FromArgb(45, 45, 48);
@@ -329,7 +357,8 @@ namespace TR28386_T_PC
 
             Button btnClearGraph = CreateBorderedButton("Clear", 170, pnlGraph.Height - 120, 120, 50);
             btnClearGraph.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            btnClearGraph.Click += (s, e) => {
+            btnClearGraph.Click += (s, e) =>
+            {
                 Array.Clear(_bufPWMRaw, 0, GRAPH_MAX_POINTS);
                 Array.Clear(_bufPWMRCLPF, 0, GRAPH_MAX_POINTS);
                 Array.Clear(_bufPWMBWLPF, 0, GRAPH_MAX_POINTS);
@@ -346,7 +375,7 @@ namespace TR28386_T_PC
             // Add 5 Plot Toggle Buttons below Pause/Clear
             string[] plotNames = { "PWMRaw", "PWMRCLPF", "PWMBWLPF", "PotenRAW", "PotenMAVE" };
             Color[] plotColors = { Color.Cyan, Color.Magenta, Color.Lime, Color.Yellow, Color.OrangeRed };
-            
+
             for (int i = 0; i < 5; i++)
             {
                 int idx = i;
@@ -368,13 +397,14 @@ namespace TR28386_T_PC
                 };
                 chk.FlatAppearance.CheckedBackColor = plotColors[idx];
                 chk.BackColor = plotColors[idx];
-                
-                chk.CheckedChanged += (s, e) => {
+
+                chk.CheckedChanged += (s, e) =>
+                {
                     chk.BackColor = chk.Checked ? plotColors[idx] : Color.FromArgb(60, 60, 60);
                     chk.ForeColor = chk.Checked ? Color.Black : Color.Gray;
                     SetPlotVisibility(idx, chk.Checked);
                 };
-                
+
                 _chkPlotToggles[i] = chk;
                 pnlGraph.Controls.Add(chk);
             }
@@ -383,7 +413,7 @@ namespace TR28386_T_PC
             mainLayout.SetRowSpan(pnlGraph, 3);
 
             this.Controls.Add(mainLayout);
-            
+
             InitGraph();
             UpdateConnectButtons();
         }
@@ -391,13 +421,13 @@ namespace TR28386_T_PC
         private void InitGraph()
         {
             _formsPlot.Plot.Style(Style.Black);
-            
+
             _sigRaw = _formsPlot.Plot.AddSignal(_bufPWMRaw, sampleRate: 1, color: Color.Cyan, label: "PWMRaw");
             _sigRCLPF = _formsPlot.Plot.AddSignal(_bufPWMRCLPF, sampleRate: 1, color: Color.Magenta, label: "PWMRCLPF");
             _sigBWLPF = _formsPlot.Plot.AddSignal(_bufPWMBWLPF, sampleRate: 1, color: Color.Lime, label: "PWMBWLPF");
             _sigPotenRaw = _formsPlot.Plot.AddSignal(_bufPotenRaw, sampleRate: 1, color: Color.Yellow, label: "PotenRAW");
             _sigPotenMave = _formsPlot.Plot.AddSignal(_bufPotenMave, sampleRate: 1, color: Color.OrangeRed, label: "PotenMAVE");
-            
+
             _sigRaw.MaxRenderIndex = 0;
             _sigRCLPF.MaxRenderIndex = 0;
             _sigBWLPF.MaxRenderIndex = 0;
@@ -473,8 +503,9 @@ namespace TR28386_T_PC
             _ctrlDto.EepWrite = true;
             _ctrlDto.EepRead = false;
             SendControlMessage();
-            
-            System.Threading.Tasks.Task.Run(async () => {
+
+            System.Threading.Tasks.Task.Run(async () =>
+            {
                 await System.Threading.Tasks.Task.Delay(50);
                 _ctrlDto.EepWrite = false;
             });
@@ -483,13 +514,14 @@ namespace TR28386_T_PC
         private void DoEepRead()
         {
             ushort addr = ParseInput(txtEepAddr.Text);
-            
+
             _ctrlDto.EepAddr = addr;
             _ctrlDto.EepWrite = false;
             _ctrlDto.EepRead = true;
             SendControlMessage();
 
-            System.Threading.Tasks.Task.Run(async () => {
+            System.Threading.Tasks.Task.Run(async () =>
+            {
                 await System.Threading.Tasks.Task.Delay(100);
                 _ctrlDto.EepRead = false;
                 _awaitingEepReadResponse = true; // Signal UI to grab the fresh value
@@ -526,7 +558,7 @@ namespace TR28386_T_PC
             BeginInvoke((Action)(() =>
             {
                 _lastRxTime = DateTime.Now;
-                lblCommReceiving.ForeColor = Color.Lime; 
+                lblCommReceiving.ForeColor = Color.Lime;
 
                 // Update UI from MCU Status
                 UpdateLedStatus(lblLEDs[0], data.Tact01);
@@ -534,14 +566,14 @@ namespace TR28386_T_PC
 
                 lblEncoderAngle.Text = string.Format("{0:0.00}", data.EncoderAngle);
                 lblEncoderRawPD.Text = data.EncoderRawPD.ToString();
-                
+
                 lblPWMRaw.Text = string.Format("{0:0.000}", data.PWMRaw);
                 lblPWMRCLPF.Text = string.Format("{0:0.000}", data.PWMRCLPF);
                 lblPWMBWLPF.Text = string.Format("{0:0.000}", data.PWMBWLPF);
-                
+
                 lblPotenRAW.Text = string.Format("{0:0.000}", data.PotenRAW);
                 lblPotenMAVE.Text = string.Format("{0:0.000}", data.PotenMAVE);
-                
+
                 lblEepromReadValStatus.Text = data.EepromReadVal.ToString("X2");
                 lblIncNumber.Text = data.IncNumber.ToString();
 
@@ -550,8 +582,8 @@ namespace TR28386_T_PC
                 // if reading EEPROM requested and responded
                 if (_awaitingEepReadResponse)
                 {
-                   txtEepData.Text = data.EepromReadVal.ToString("X2");
-                   _awaitingEepReadResponse = false;
+                    txtEepData.Text = data.EepromReadVal.ToString("X2");
+                    _awaitingEepReadResponse = false;
                 }
             }));
         }
@@ -634,19 +666,20 @@ namespace TR28386_T_PC
         private Panel CreateStyledPanel(string title)
         {
             Panel pnl = new Panel { BackColor = colorPanelBg, Padding = new Padding(5) };
-            pnl.Paint += (s, e) => {
+            pnl.Paint += (s, e) =>
+            {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 Color mint = Color.FromArgb(0, 255, 200);
                 Pen pen = new Pen(Color.FromArgb(80, 80, 80), 1);
-                
+
                 // Draw the border rectangle
                 e.Graphics.DrawRectangle(pen, 5, 12, pnl.Width - 11, pnl.Height - 18);
-                
+
                 // Draw title background
                 Font titleFont = new Font("맑은 고딕", 10, FontStyle.Bold);
                 SizeF titleSize = e.Graphics.MeasureString(title, titleFont);
                 e.Graphics.FillRectangle(new SolidBrush(colorPanelBg), 15, 2, titleSize.Width + 10, 20);
-                
+
                 // Draw Title
                 e.Graphics.DrawString(title, titleFont, new SolidBrush(mint), new PointF(20, 2));
             };
@@ -660,7 +693,8 @@ namespace TR28386_T_PC
 
         private Button CreateBorderedButton(string text, int x, int y, int w, int h)
         {
-            Button btn = new Button {
+            Button btn = new Button
+            {
                 Text = text,
                 Location = new Point(x, y),
                 Width = w,
@@ -708,12 +742,12 @@ namespace TR28386_T_PC
             string hexData = BitConverter.ToString(rawData).Replace("-", " ");
             string timeStr = DateTime.Now.ToString("HH:mm:ss.fff");
             string line = $"[{timeStr}] RX: {hexData}";
-            
+
             BeginInvoke((Action)(() =>
             {
                 lblLogRxInfo.Text = line;
             }));
-            
+
             if (_logForm != null) _logForm.AddLog(line);
         }
 
@@ -722,19 +756,24 @@ namespace TR28386_T_PC
             string hexData = BitConverter.ToString(rawData).Replace("-", " ");
             string timeStr = DateTime.Now.ToString("HH:mm:ss.fff");
             string line = $"[{timeStr}] TX: {hexData}";
-            
+
             BeginInvoke((Action)(() =>
             {
                 lblLogTxInfo.Text = line;
             }));
-            
+
             if (_logForm != null) _logForm.AddLog(line);
+        }
+
+        private void InitializeComponent()
+        {
+
         }
 
         private Label CreateLabelValue(string title, string defValue, int x, int y, Control parent)
         {
-            Label lbl = new Label { Location = new Point(x, y), AutoSize = true, Text = title, ForeColor=ControlPaint.Light(colorText), Font=new Font("Segoe UI", 10) };
-            Label val = new Label { Location = new Point(x + 240, y - 2), AutoSize = false, Size = new Size(200, 35), Text = defValue, Font=new Font("Consolas", 12, FontStyle.Bold), ForeColor=Color.White, TextAlign=ContentAlignment.MiddleLeft };
+            Label lbl = new Label { Location = new Point(x, y), AutoSize = true, Text = title, ForeColor = ControlPaint.Light(colorText), Font = new Font("Segoe UI", 10) };
+            Label val = new Label { Location = new Point(x + 240, y - 2), AutoSize = false, Size = new Size(200, 35), Text = defValue, Font = new Font("Consolas", 12, FontStyle.Bold), ForeColor = Color.White, TextAlign = ContentAlignment.MiddleLeft };
             parent.Controls.Add(lbl);
             parent.Controls.Add(val);
             return val;

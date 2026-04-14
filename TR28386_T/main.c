@@ -113,7 +113,6 @@ static void cycle_10ms(void)
 	updateHwSwitchStatus2();
 	updateTactStatus();
 
-    updateGpioLed();
     updateAdcData();
     
     // EPWM7A 상태 업데이트 (10ms 주기)

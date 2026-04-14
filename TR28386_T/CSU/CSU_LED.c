@@ -128,18 +128,39 @@ void Initial_LED(void)
 void updateLedStatus(void)
 {
     uint16_t i = 0u;
-    stLed *pLed[2];
+    // PowerOn LED + LED 01~08까지 총 9개 관리
+    stLed *pLed[9];
     
+    // 1. 구조체 포인터 배열 매핑
     pLed[0] = &xLed.ledPowerOn;
     pLed[1] = &xLed.led01;
+    pLed[2] = &xLed.led02;
+    pLed[3] = &xLed.led03;
+    pLed[4] = &xLed.led04;
+    pLed[5] = &xLed.led05;
+    pLed[6] = &xLed.led06;
+    pLed[7] = &xLed.led07;
+    pLed[8] = &xLed.led08;
 
-    for(i = 0u; i < 2u; i++)
+    // 2. IPC 메시지 데이터를 구조체 상태값으로 동기화 (기존 updateGpioLed 기능 통합)
+    // 토글 모드가 아닐 때만 IPC 메시지 값을 반영하도록 설계하는 것이 안전합니다.
+    xLed.led01.State = (bool)xRcvIpcMsg1.Command.bit.LED01;
+    xLed.led02.State = (bool)xRcvIpcMsg1.Command.bit.LED02;
+    xLed.led03.State = (bool)xRcvIpcMsg1.Command.bit.LED03;
+    xLed.led04.State = (bool)xRcvIpcMsg1.Command.bit.LED04;
+    xLed.led05.State = (bool)xRcvIpcMsg1.Command.bit.LED05;
+    xLed.led06.State = (bool)xRcvIpcMsg1.Command.bit.LED06;
+    xLed.led07.State = (bool)xRcvIpcMsg1.Command.bit.LED07;
+    xLed.led08.State = (bool)xRcvIpcMsg1.Command.bit.LED08;
+
+    // 3. 전체 LED 상태 업데이트 루프
+    for(i = 0u; i < 9u; i++)
     {
         if(pLed[i]->Toggle == LED_TOGGLE)
-		{
+        {
             if(pLed[i]->Temp == 0u)
             {
-                HW_toggleLedPin(pLed[i]->Index); // 레지스터 직접 제어
+                HW_toggleLedPin(pLed[i]->Index);
                 pLed[i]->Temp = pLed[i]->Time;
             }
             else
@@ -149,7 +170,8 @@ void updateLedStatus(void)
         }
         else
         {
-            HW_writeLedPin(pLed[i]->Index, pLed[i]->State); // 레지스터 직접 제어
+            // State 값에 따라 물리 핀 출력
+            HW_writeLedPin(pLed[i]->Index, pLed[i]->State);
         }
     }
 }
@@ -287,18 +309,3 @@ static void HW_toggleLedPin(uint16_t Index)
 	break;
 	}
 }
-
-
-void updateGpioLed(void)
-{
-    // LED01 ~ LED08 (xRcvIpcMsg1.Command) -> GPIO 32 ~ 39 
-    GPIO_writePin(32, xRcvIpcMsg1.Command.bit.LED01);
-    GPIO_writePin(33, xRcvIpcMsg1.Command.bit.LED02);
-    GPIO_writePin(34, xRcvIpcMsg1.Command.bit.LED03);
-    GPIO_writePin(35, xRcvIpcMsg1.Command.bit.LED04);
-    GPIO_writePin(36, xRcvIpcMsg1.Command.bit.LED05);
-    GPIO_writePin(37, xRcvIpcMsg1.Command.bit.LED06);
-    GPIO_writePin(38, xRcvIpcMsg1.Command.bit.LED07);
-    GPIO_writePin(39, xRcvIpcMsg1.Command.bit.LED08);
-}
-
