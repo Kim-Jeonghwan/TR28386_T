@@ -34,8 +34,8 @@
 #include "CSU_Adc.h"
 
 /* ************************** [[   define   ]]  *********************************************************** */
-#define DEFAULT_MAVE_COUNT   100u   // 이동 평균 필터 카운트 (BUFF_SIZE 보다 작아야 함)
-#define DEFAULT_PWM_HZ       1000u  // ePWM8 기본 주파수 (1kHz)
+#define DEFAULT_MAVE_COUNT   100u   // 이동 평균 필터 카운트
+#define DEFAULT_PWM_HZ       100000u  // ePWM8 트리거 주파수 (100kHz 조정)
 
 
 /* ************************** [[   global   ]]  *********************************************************** */
@@ -141,18 +141,18 @@ void InitAdcModules(void)
 {
     // ADC-A 초기화
 	EALLOW;
-    AdcaRegs.ADCCTL2.bit.PRESCALE		= 14u;	// ADC 클럭(ADCCLK) 주파수 설정: 시스템 클럭 / 8 (200MHz / 8 = 25MHz)
-    AdcSetMode(ADC_ADCA, ADC_RESOLUTION_12BIT, ADC_SIGNALMODE_SINGLE);  // ADC-A 모드 설정 (12-bit 해상도, 싱글 엔디드 입력)
-    AdcaRegs.ADCCTL1.bit.INTPULSEPOS 	= 1u;	// ADC 인터럽트 펄스 발생 시점 설정: 변환 완료 후
-    AdcaRegs.ADCCTL1.bit.ADCPWDNZ 		= 1u;	// ADC 모듈 전원 On
-    DELAY_US(1000);								// ADC 회로 안정화 대기 (1ms)
+    AdcaRegs.ADCCTL2.bit.PRESCALE		= 6u;	// ADCCLK = SYSCLK / 4 (200MHz / 4 = 50MHz : 최대 속도)
+    AdcSetMode(ADC_ADCA, ADC_RESOLUTION_12BIT, ADC_SIGNALMODE_SINGLE);
+    AdcaRegs.ADCCTL1.bit.INTPULSEPOS 	= 1u;
+    AdcaRegs.ADCCTL1.bit.ADCPWDNZ 		= 1u;
+    DELAY_US(1000);
     
-	AdcaRegs.ADCSOC0CTL.bit.CHSEL		= 2u;	// SOC0: ADC-A의 2번 채널(A2) 선택
-	AdcaRegs.ADCSOC0CTL.bit.ACQPS		= 39u;	// 샘플 앤 홀드 창 크기 설정
-	AdcaRegs.ADCSOC0CTL.bit.TRIGSEL		= 19u;	// 트리거 소스: ePWM8 SOCA (F2838x에서는 19번)
+	AdcaRegs.ADCSOC0CTL.bit.CHSEL		= 2u;
+	AdcaRegs.ADCSOC0CTL.bit.ACQPS		= 14u;	// 샘플링 윈도우 최소화 (고속 대응)
+	AdcaRegs.ADCSOC0CTL.bit.TRIGSEL		= 19u;
 
-	AdcaRegs.ADCSOC1CTL.bit.CHSEL		= 4u;	// SOC1: ADC-A의 4번 채널(A4) 선택
-	AdcaRegs.ADCSOC1CTL.bit.ACQPS		= 39u;
+	AdcaRegs.ADCSOC1CTL.bit.CHSEL		= 4u;
+	AdcaRegs.ADCSOC1CTL.bit.ACQPS		= 14u;
 	AdcaRegs.ADCSOC1CTL.bit.TRIGSEL		= 19u;
 
     AdcaRegs.ADCINTSEL1N2.bit.INT1SEL 	= 0u; 	// SOC0 변환 완료 시 INT1 시퀀스 발생
@@ -171,26 +171,26 @@ void InitAdcModules(void)
 
 	// ADC-C 초기화
 	EALLOW;
-    AdccRegs.ADCCTL2.bit.PRESCALE		= 14u;
+    AdccRegs.ADCCTL2.bit.PRESCALE		= 6u;
     AdcSetMode(ADC_ADCC, ADC_RESOLUTION_12BIT, ADC_SIGNALMODE_SINGLE);
     AdccRegs.ADCCTL1.bit.ADCPWDNZ 		= 1u;
     DELAY_US(1000);
 
-	AdccRegs.ADCSOC0CTL.bit.CHSEL		= 4u;	// SOC0: ADC-C의 4번 채널(C4) 선택
-	AdccRegs.ADCSOC0CTL.bit.ACQPS		= 39u;
+	AdccRegs.ADCSOC0CTL.bit.CHSEL		= 4u;
+	AdccRegs.ADCSOC0CTL.bit.ACQPS		= 14u;
 	AdccRegs.ADCSOC0CTL.bit.TRIGSEL		= 19u;
 	EDIS;
 
 
 	// ADC-D 초기화
 	EALLOW;
-    AdcdRegs.ADCCTL2.bit.PRESCALE		= 14u;
+    AdcdRegs.ADCCTL2.bit.PRESCALE		= 6u;
     AdcSetMode(ADC_ADCD, ADC_RESOLUTION_12BIT, ADC_SIGNALMODE_SINGLE);
     AdcdRegs.ADCCTL1.bit.ADCPWDNZ 		= 1u;
     DELAY_US(1000);
 
-	AdcdRegs.ADCSOC0CTL.bit.CHSEL		= 4u;	// SOC0: ADC-D의 4번 채널(D4) 선택
-	AdcdRegs.ADCSOC0CTL.bit.ACQPS		= 39u;
+	AdcdRegs.ADCSOC0CTL.bit.CHSEL		= 4u;
+	AdcdRegs.ADCSOC0CTL.bit.ACQPS		= 14u;
 	AdcdRegs.ADCSOC0CTL.bit.TRIGSEL		= 19u;
     EDIS;
 }

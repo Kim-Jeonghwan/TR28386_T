@@ -73,6 +73,7 @@ namespace TR28386_T_PC
         private ScottPlot.Plottable.SignalPlot _sigPotenRaw;
         private ScottPlot.Plottable.SignalPlot _sigPotenMave;
         private bool _isGraphPaused = false;
+        private CheckBox[] _chkPlotToggles = new CheckBox[5];
 
         // Log
         private LogForm _logForm;
@@ -117,7 +118,7 @@ namespace TR28386_T_PC
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 195)); // Comm row
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 360)); // Status row
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 390)); // Control row
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 160)); // Log row
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110)); // Log row (Reduced from 160)
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 675));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 600));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); // Graph column
@@ -315,15 +316,10 @@ namespace TR28386_T_PC
             pnlGraph.Margin = new Padding(5);
 
             _formsPlot = new FormsPlot { Location = new Point(15, 45), Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom };
-            _formsPlot.Size = new Size(pnlGraph.Width - 30, pnlGraph.Height - 125);
-            // Height calculates automatically based on anchors, setting initial size prevents zero-clip
+            _formsPlot.Size = new Size(pnlGraph.Width - 30, pnlGraph.Height - 185);
             pnlGraph.Controls.Add(_formsPlot);
             
-            pnlGraph.Resize += (s,e) => {
-                _formsPlot.Height = pnlGraph.Height - 125; 
-            };
-
-            Button btnToggleGraph = CreateBorderedButton("Pause", 30, pnlGraph.Height - 65, 120, 50);
+                Button btnToggleGraph = CreateBorderedButton("Pause", 30, pnlGraph.Height - 120, 120, 50);
             btnToggleGraph.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnToggleGraph.Click += (s, e) => {
                 _isGraphPaused = !_isGraphPaused;
@@ -331,7 +327,7 @@ namespace TR28386_T_PC
                 btnToggleGraph.BackColor = _isGraphPaused ? Color.Orange : Color.FromArgb(45, 45, 48);
             };
 
-            Button btnClearGraph = CreateBorderedButton("Clear", 170, pnlGraph.Height - 65, 120, 50);
+            Button btnClearGraph = CreateBorderedButton("Clear", 170, pnlGraph.Height - 120, 120, 50);
             btnClearGraph.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnClearGraph.Click += (s, e) => {
                 Array.Clear(_bufPWMRaw, 0, GRAPH_MAX_POINTS);
@@ -346,6 +342,42 @@ namespace TR28386_T_PC
 
             pnlGraph.Controls.Add(btnToggleGraph);
             pnlGraph.Controls.Add(btnClearGraph);
+
+            // Add 5 Plot Toggle Buttons below Pause/Clear
+            string[] plotNames = { "PWMRaw", "PWMRCLPF", "PWMBWLPF", "PotenRAW", "PotenMAVE" };
+            Color[] plotColors = { Color.Cyan, Color.Magenta, Color.Lime, Color.Yellow, Color.OrangeRed };
+            
+            for (int i = 0; i < 5; i++)
+            {
+                int idx = i;
+                CheckBox chk = new CheckBox
+                {
+                    Text = plotNames[idx],
+                    Appearance = Appearance.Button,
+                    Width = 125,
+                    Height = 45,
+                    Location = new Point(30 + (idx * 135), pnlGraph.Height - 60),
+                    Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    FlatStyle = FlatStyle.Flat,
+                    Checked = true,
+                    BackColor = plotColors[idx],
+                    ForeColor = Color.Black,
+                    Font = new Font("Consolas", 8, FontStyle.Bold),
+                    Cursor = Cursors.Hand
+                };
+                chk.FlatAppearance.CheckedBackColor = plotColors[idx];
+                chk.BackColor = plotColors[idx];
+                
+                chk.CheckedChanged += (s, e) => {
+                    chk.BackColor = chk.Checked ? plotColors[idx] : Color.FromArgb(60, 60, 60);
+                    chk.ForeColor = chk.Checked ? Color.Black : Color.Gray;
+                    SetPlotVisibility(idx, chk.Checked);
+                };
+                
+                _chkPlotToggles[i] = chk;
+                pnlGraph.Controls.Add(chk);
+            }
 
             mainLayout.Controls.Add(pnlGraph, 2, 0);
             mainLayout.SetRowSpan(pnlGraph, 3);
@@ -576,6 +608,20 @@ namespace TR28386_T_PC
             _sigBWLPF.MaxRenderIndex = _graphIndex - 1;
             _sigPotenRaw.MaxRenderIndex = _graphIndex - 1;
             _sigPotenMave.MaxRenderIndex = _graphIndex - 1;
+        }
+
+        private void SetPlotVisibility(int index, bool visible)
+        {
+            if (_formsPlot == null) return;
+            switch (index)
+            {
+                case 0: if (_sigRaw != null) _sigRaw.IsVisible = visible; break;
+                case 1: if (_sigRCLPF != null) _sigRCLPF.IsVisible = visible; break;
+                case 2: if (_sigBWLPF != null) _sigBWLPF.IsVisible = visible; break;
+                case 3: if (_sigPotenRaw != null) _sigPotenRaw.IsVisible = visible; break;
+                case 4: if (_sigPotenMave != null) _sigPotenMave.IsVisible = visible; break;
+            }
+            _formsPlot.Refresh();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
