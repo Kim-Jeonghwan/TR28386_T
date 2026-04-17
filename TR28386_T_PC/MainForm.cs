@@ -10,12 +10,16 @@ using System.Drawing.Drawing2D;
 using System.IO.Ports;
 using System.Windows.Forms;
 using ScottPlot;
+using System.Management;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TR28386_T_PC
 {
     public class MainForm : Form
     {
-        private SciPcProtocol _protocol;
+        private IProtocol _protocol; // Interface for switching between SCI and CAN
         private System.Windows.Forms.Timer _timer;
 
         // Custom UI Colors - Dark Theme
@@ -39,6 +43,8 @@ namespace TR28386_T_PC
         private Button btnRefresh;
         private Label lblPortConnected;
         private Label lblCommReceiving;
+        private RadioButton rdoSerial;
+        private RadioButton rdoCan;
 
         // Status Arrays
         private Label[] lblLEDs; // 0=Tact01, 1=Tact02. To show ON/OFF
@@ -89,7 +95,7 @@ namespace TR28386_T_PC
         public MainForm()
         {
             this.Text = "TR28386_T Monitoring & Dashboard";
-            this.Size = new Size(2100, 1250);
+            this.Size = new Size(2100, 1350); // Increased height to accommodate MenuStrip
             this.MaximumSize = this.Size;
             this.MinimumSize = this.Size;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -102,18 +108,33 @@ namespace TR28386_T_PC
 
             _logForm = new LogForm();
 
-            _protocol = new SciPcProtocol();
-            _protocol.OnStatusReceived += OnStatusReceived;
-            _protocol.OnCommError += OnCommError;
-            _protocol.OnPortClosed += () => Invoke((Action)UpdateConnectButtons);
-
-            _protocol.OnRawTx += OnRawTxReceived;
-            _protocol.OnRawRx += OnRawRxReceived;
+            _protocol = new SciPcProtocol(); // Default
+            SetupProtocolEvents();
+            SetupMenu(); // Add standard Windows menu
 
             _timer = new System.Windows.Forms.Timer { Interval = 100 };
             _timer.Tick += Timer_Tick;
 
             BuildUI();
+            this.Load += (s, e) => ForceLayoutUpdate();
+        }
+
+        private void ForceLayoutUpdate()
+        {
+            // 시스템 제약을 무시하고 강제로 좌표와 크기를 재설정
+            cmbPorts.Size = new Size(500, 35); 
+            cmbBauds.Size = new Size(500, 35);
+            
+            int commY = 100;
+            btnRefresh.Location = new Point(680, commY - 5);
+            btnConnect.Location = new Point(680, commY + 65);
+            btnDisconnect.Location = new Point(800, commY + 65);
+            btnInit.Location = new Point(920, commY + 65);
+
+            lblPortConnected.Location = new Point(800, commY);
+            lblCommReceiving.Location = new Point(970, commY);
+            
+            this.Refresh();
         }
 
         private void BuildUI()
@@ -123,12 +144,12 @@ namespace TR28386_T_PC
                 Dock = DockStyle.Fill,
                 RowCount = 4,
                 ColumnCount = 3,
-                Padding = new Padding(15)
+                Padding = new Padding(15, 40, 15, 15) // Top padding increased for MenuStrip
             };
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 195)); // Comm row
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 380)); // Status row (+20)
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 270)); // Comm row (Increased from 195)
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 380)); // Status row
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 390)); // Control row
-            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110)); // Log row (Reduced from 160)
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110)); // Log row
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 675));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 600));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100)); // Graph column
@@ -139,55 +160,66 @@ namespace TR28386_T_PC
             pnlComm.Margin = new Padding(5);
             mainLayout.SetColumnSpan(pnlComm, 2);
 
-            // Labels
-            Label lblPort = new Label { Text = "COM Port", Location = new Point(20, 50), AutoSize = true, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
+            // Labels - Shifted down by ~80-100 pixels to avoid header clipping
+            int commY = 100;
+            Label lblPort = new Label { Text = "COM Port", Location = new Point(20, commY), AutoSize = true, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
             cmbPorts = new ComboBox
             {
-                Location = new Point(160, 48),
-                Width = 150,
+                Location = new Point(160, commY - 2),
+                Size = new Size(350, 35), // Use Size instead of Width
+                MaximumSize = new Size(1000, 1000), // Remove any hidden limits
                 BackColor = Color.FromArgb(45, 45, 48),
                 ForeColor = Color.FromArgb(0, 255, 200),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("맑은 고딕", 11, FontStyle.Regular)
             };
             UpdatePortsList();
-            cmbPorts.Click += (s, e) => UpdatePortsList();
+            // cmbPorts.Click += (s, e) => UpdatePortsList(); // 자동 갱신 기능 제거
 
-            btnRefresh = CreateBorderedButton("새로고침", 320, 45, 135, 50);
+            // Refresh button - Width 135 to fit "새로고침"
+            btnRefresh = CreateBorderedButton("새로고침", 530, commY - 5, 100, 50); 
             btnRefresh.Click += (s, e) => UpdatePortsList();
 
-            lblPortConnected = new Label { Text = "● 포트 연결됨", Location = new Point(480, 50), AutoSize = true, ForeColor = Color.Gray, Font = new Font("맑은 고딕", 11, FontStyle.Bold) };
-            lblCommReceiving = new Label { Text = "● 통신 수신중", Location = new Point(720, 50), AutoSize = true, ForeColor = Color.Gray, Font = new Font("맑은 고딕", 11, FontStyle.Bold) };
+            lblPortConnected = new Label { Text = "● 포트 연결됨", Location = new Point(680, commY), AutoSize = true, ForeColor = Color.Gray, Font = new Font("맑은 고딕", 11, FontStyle.Bold) }; 
+            lblCommReceiving = new Label { Text = "● 통신 수신중", Location = new Point(880, commY), AutoSize = true, ForeColor = Color.Gray, Font = new Font("맑은 고딕", 11, FontStyle.Bold) }; 
 
-            Label lblBaud = new Label { Text = "Baud Rate", Location = new Point(20, 120), AutoSize = true, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
+            Label lblBaud = new Label { Text = "Baud Rate", Location = new Point(20, commY + 70), AutoSize = true, Font = new Font("Segoe UI", 11, FontStyle.Bold) };
             cmbBauds = new ComboBox
             {
-                Location = new Point(160, 118),
-                Width = 150,
+                Location = new Point(160, commY + 68),
+                Size = new Size(350, 35), 
+                MaximumSize = new Size(1000, 1000), 
                 BackColor = Color.FromArgb(45, 45, 48),
                 ForeColor = Color.FromArgb(0, 255, 200),
                 DropDownStyle = ComboBoxStyle.DropDownList,
                 Font = new Font("맑은 고딕", 11, FontStyle.Regular)
             };
-            cmbBauds.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200", "230400", "460800" });
+            cmbBauds.Items.AddRange(new object[] { "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600" });
             cmbBauds.SelectedItem = "115200";
 
-            btnConnect = CreateBorderedButton("연결", 320, 115, 100, 50);
+            btnConnect = CreateBorderedButton("연결", 530, commY + 65, 100, 50); 
             btnConnect.Click += (s, e) => Connect();
 
-            btnDisconnect = CreateBorderedButton("해제", 440, 115, 100, 50);
+            btnDisconnect = CreateBorderedButton("해제", 640, commY + 65, 100, 50); 
             btnDisconnect.Click += (s, e) => _protocol.Disconnect();
 
-            btnInit = CreateBorderedButton("초기화", 560, 115, 100, 50);
+            btnInit = CreateBorderedButton("초기화", 750, commY + 65, 100, 50); 
             btnInit.Click += (s, e) => _protocol.ReInit();
 
+            rdoSerial = new RadioButton { Text = "Serial (SCI)", Location = new Point(20, 45), Checked = true, AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold), ForeColor = Color.Yellow };
+            rdoCan = new RadioButton { Text = "uCAN (CAN)", Location = new Point(160, 45), AutoSize = true, Font = new Font("Segoe UI", 10, FontStyle.Bold), ForeColor = Color.Orange };
+            
+            rdoSerial.CheckedChanged += (s, e) => { if (rdoSerial.Checked) { UpdateModeUI(false); } };
+            rdoCan.CheckedChanged += (s, e) => { if (rdoCan.Checked) { UpdateModeUI(true); } };
+
             pnlComm.Controls.AddRange(new Control[] {
+                rdoSerial, rdoCan,
                 lblPort, lblBaud, cmbPorts, cmbBauds, btnRefresh,
                 btnConnect, btnDisconnect, btnInit,
                 lblPortConnected, lblCommReceiving
             });
 
-            pnlComm.Height = 190;
+            pnlComm.Height = 260;
             mainLayout.Controls.Add(pnlComm, 0, 0);
 
             // Status Panel
@@ -276,6 +308,7 @@ namespace TR28386_T_PC
             pnlCtrls.Controls.Add(cmbEpwmFreq);
 
             pnlCtrls.Height = 350;
+            pnlCtrls.Name = "pnlCtrls"; // Name for easy access
 
 
             // EEPROM Control (Row 2, Col 1)
@@ -300,6 +333,7 @@ namespace TR28386_T_PC
             pnlEep.Controls.Add(btnEepRead);
 
             pnlEep.Height = 350;
+            pnlEep.Name = "pnlEep"; // Name for easy access
 
 
             // Add to MainLayout (pnlComm already added above)
@@ -337,12 +371,11 @@ namespace TR28386_T_PC
 
             // Set up Graph Panel (RowSpan = 3, Column = 2)
             Panel pnlGraph = CreateStyledPanel("Real-Time PWM Logs (20 sec)");
+            pnlGraph.Name = "pnlGraph"; 
             pnlGraph.Dock = DockStyle.Fill;
             pnlGraph.Margin = new Padding(5);
-
-            pnlGraph.Padding = new Padding(15, 45, 15, 150); // Bottom margin 300
-            pnlGraph.Margin = new Padding(5);
- 
+            pnlGraph.Padding = new Padding(15, 45, 15, 150); 
+            
             _formsPlot = new FormsPlot { Dock = DockStyle.Fill };
             pnlGraph.Controls.Add(_formsPlot);
 
@@ -418,6 +451,51 @@ namespace TR28386_T_PC
             UpdateConnectButtons();
         }
 
+        private void SetupMenu()
+        {
+            MenuStrip menuStrip = new MenuStrip
+            {
+                BackColor = Color.FromArgb(45, 45, 48),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10),
+                RenderMode = ToolStripRenderMode.System // Use system rendering for better visibility
+            };
+
+            // File Menu
+            ToolStripMenuItem fileMenu = new ToolStripMenuItem("File (&F)");
+            fileMenu.ForeColor = Color.White;
+            fileMenu.DropDown.BackColor = Color.FromArgb(45, 45, 48);
+            fileMenu.DropDown.ForeColor = Color.White;
+
+            ToolStripMenuItem exitItem = new ToolStripMenuItem("Exit (&X)", null, (s, e) => this.Close());
+            exitItem.ForeColor = Color.White;
+            fileMenu.DropDownItems.Add(exitItem);
+
+            // Help Menu
+            ToolStripMenuItem helpMenu = new ToolStripMenuItem("Help (&H)");
+            helpMenu.ForeColor = Color.White;
+            helpMenu.DropDown.BackColor = Color.FromArgb(45, 45, 48);
+            helpMenu.DropDown.ForeColor = Color.White;
+
+            ToolStripMenuItem aboutItem = new ToolStripMenuItem("About (&A)", null, (s, e) => {
+                MessageBox.Show("TR28386_T Monitoring & Dashboard\n\n" +
+                                "Version: 1.0\n" +
+                                "Date: 2026. 04. 17.\n" +
+                                "Developer: Kim Jeonghwan (Nexcom)", 
+                                "About Program", 
+                                MessageBoxButtons.OK, 
+                                MessageBoxIcon.Information);
+            });
+            aboutItem.ForeColor = Color.White;
+            helpMenu.DropDownItems.Add(aboutItem);
+
+            menuStrip.Items.Add(fileMenu);
+            menuStrip.Items.Add(helpMenu);
+
+            this.MainMenuStrip = menuStrip;
+            this.Controls.Add(menuStrip);
+        }
+
         private void InitGraph()
         {
             _formsPlot.Plot.Style(Style.Black);
@@ -443,11 +521,40 @@ namespace TR28386_T_PC
 
         private void UpdatePortsList()
         {
-            var ports = SerialPort.GetPortNames();
             string selected = cmbPorts.SelectedItem as string;
             cmbPorts.Items.Clear();
-            cmbPorts.Items.AddRange(ports);
-            if (ports.Length > 0)
+
+            try
+            {
+                using (var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE Caption LIKE '%(COM%)'"))
+                {
+                    var ports = searcher.Get().Cast<ManagementBaseObject>().ToList();
+                    var list = new List<string>();
+                    
+                    foreach (var p in ports)
+                    {
+                        string caption = p["Caption"].ToString();
+                        list.Add(caption);
+                    }
+
+                    // Sort by COM number
+                    list.Sort((a, b) =>
+                    {
+                        int aNum = GetPortNumber(a);
+                        int bNum = GetPortNumber(b);
+                        return aNum.CompareTo(bNum);
+                    });
+
+                    foreach (var item in list) cmbPorts.Items.Add(item);
+                }
+            }
+            catch
+            {
+                // Fallback to simple list if WMI fails
+                cmbPorts.Items.AddRange(SerialPort.GetPortNames());
+            }
+
+            if (cmbPorts.Items.Count > 0)
             {
                 if (selected != null && cmbPorts.Items.Contains(selected))
                     cmbPorts.SelectedItem = selected;
@@ -456,12 +563,35 @@ namespace TR28386_T_PC
             }
         }
 
+        private int GetPortNumber(string caption)
+        {
+            var match = Regex.Match(caption, @"\(COM(\d+)\)");
+            if (match.Success) return int.Parse(match.Groups[1].Value);
+            return 0;
+        }
+
         private void Connect()
         {
             if (cmbPorts.SelectedItem == null || cmbBauds.SelectedItem == null) return;
             try
             {
-                _protocol.Connect(cmbPorts.SelectedItem.ToString(), int.Parse(cmbBauds.SelectedItem.ToString()));
+                if (_protocol != null && _protocol.IsConnected) _protocol.Disconnect();
+
+                // Re-initialize based on mode
+                if (rdoSerial.Checked)
+                    _protocol = new SciPcProtocol();
+                else
+                    _protocol = new CanProtocol();
+
+                SetupProtocolEvents();
+
+                // Extract COM Port (e.g., "Silicon Labs... (COM3)" -> "COM3")
+                string rawSelection = cmbPorts.SelectedItem.ToString();
+                string portName = rawSelection;
+                var match = Regex.Match(rawSelection, @"\((COM\d+)\)");
+                if (match.Success) portName = match.Groups[1].Value;
+
+                _protocol.Connect(portName, int.Parse(cmbBauds.SelectedItem.ToString()));
                 UpdateConnectButtons();
                 _timer.Start();
 
@@ -474,12 +604,33 @@ namespace TR28386_T_PC
             }
         }
 
+        private void SetupProtocolEvents()
+        {
+            _protocol.OnStatusReceived += OnStatusReceived;
+            _protocol.OnCommError += OnCommError;
+            _protocol.OnPortClosed += () => { if (!IsDisposed) Invoke((Action)UpdateConnectButtons); };
+            _protocol.OnRawTx += OnRawTxReceived;
+            _protocol.OnRawRx += OnRawRxReceived;
+        }
+
         private void UpdateConnectButtons()
         {
             bool isConn = _protocol.IsConnected;
             btnConnect.Enabled = !isConn;
             btnDisconnect.Enabled = isConn;
             btnInit.Enabled = isConn;
+
+            // 연결 중에는 반대편 모드로의 전환만 방지 (현재 모드는 활성 상태 유지)
+            if (isConn)
+            {
+                rdoSerial.Enabled = rdoSerial.Checked;
+                rdoCan.Enabled = rdoCan.Checked;
+            }
+            else
+            {
+                rdoSerial.Enabled = true;
+                rdoCan.Enabled = true;
+            }
 
             if (isConn)
             {
@@ -642,6 +793,110 @@ namespace TR28386_T_PC
             _sigPotenMave.MaxRenderIndex = _graphIndex - 1;
         }
 
+        private void UpdateModeUI(bool isCanMode)
+        {
+            Color activeColor = Color.White;
+            Color inactiveColor = Color.FromArgb(60, 60, 60); // Darker gray for "Black-out" look
+            Color mint = Color.FromArgb(0, 255, 200);
+            Color targetColor = isCanMode ? inactiveColor : activeColor;
+
+            // 1. PWM Controls & Labels
+            chkEpwm7a.Enabled = !isCanMode;
+            chkEpwm7a.ForeColor = isCanMode ? inactiveColor : Color.FromArgb(0, 190, 255);
+            trbEpwmDuty.Enabled = !isCanMode;
+            cmbEpwmFreq.Enabled = !isCanMode;
+            lblEpwmDutyVal.ForeColor = targetColor;
+
+            // Find labels in pnlCtrls and gray them out
+            Panel pnlCtrls = this.Controls.Find("pnlCtrls", true)[0] as Panel;
+            if (pnlCtrls != null)
+            {
+                foreach (Control c in pnlCtrls.Controls)
+                {
+                    if (c is Label && c != lblEpwmDutyVal) c.ForeColor = targetColor;
+                }
+            }
+
+            // 2. EEPROM Panel disable
+            Panel pnlEep = this.Controls.Find("pnlEep", true)[0] as Panel;
+            if (pnlEep != null)
+            {
+                pnlEep.Enabled = !isCanMode;
+                foreach (Control c in pnlEep.Controls)
+                {
+                    if (c is Label || c is TextBox) c.ForeColor = targetColor;
+                    if (c is Button) { c.Enabled = !isCanMode; c.ForeColor = isCanMode ? inactiveColor : Color.White; }
+                }
+            }
+
+            // 3. Status Labels Gray-out (All labels in Status panel)
+            lblEncoderAngle.ForeColor = targetColor;
+            lblEncoderRawPD.ForeColor = targetColor;
+            lblPWMRaw.ForeColor = targetColor;
+            lblPWMRCLPF.ForeColor = targetColor;
+            lblPWMBWLPF.ForeColor = targetColor;
+            lblPotenRAW.ForeColor = targetColor;
+            lblPotenMAVE.ForeColor = targetColor;
+            lblEepromReadValStatus.ForeColor = targetColor;
+            lblIncNumber.ForeColor = targetColor;
+
+            // Gray out the title labels in pnlStatus as well (Except Tact01, Tact02)
+            if (lblEncoderAngle.Parent != null)
+            {
+                foreach (Control c in lblEncoderAngle.Parent.Controls)
+                {
+                    if (c is Label)
+                    {
+                        // Tact01, Tact02 및 Seq(IncNumber) 관련 라벨은 항상 활성 색상 유지
+                        if (c.Text.Contains("Tact01") || c.Text.Contains("Tact02") || 
+                            c.Text.Contains("Seq") || c.Text.Contains("IncNumber") ||
+                            c == lblIncNumber || Array.Exists(lblLEDs, l => l == c))
+                        {
+                            if (!Array.Exists(lblLEDs, l => l == c)) 
+                                c.ForeColor = Color.White; 
+                            continue;
+                        }
+
+                        c.ForeColor = targetColor;
+                    }
+                }
+            }
+
+            // 4. Graph Panel disable
+            Panel pnlGraph = this.Controls.Find("pnlGraph", true)[0] as Panel;
+            if (pnlGraph != null)
+            {
+                pnlGraph.Enabled = !isCanMode;
+            }
+
+            // 5. Graph Plot Toggles (Disable unused plots in CAN mode)
+            for (int i = 0; i < 5; i++)
+            {
+                _chkPlotToggles[i].Enabled = !isCanMode;
+                if (isCanMode)
+                {
+                    _chkPlotToggles[i].Checked = false;
+                    _chkPlotToggles[i].BackColor = inactiveColor;
+                    SetPlotVisibility(i, false);
+                }
+                else
+                {
+                    _chkPlotToggles[i].Checked = true;
+                    // Restore original colors would be nice but InitGraph handles it.
+                }
+            }
+
+            if (isCanMode)
+            {
+                _formsPlot.Plot.Clear();
+                _formsPlot.Refresh();
+            }
+            else
+            {
+                InitGraph(); // Re-init plots and colors
+            }
+        }
+
         private void SetPlotVisibility(int index, bool visible)
         {
             if (_formsPlot == null) return;
@@ -703,6 +958,9 @@ namespace TR28386_T_PC
                 BackColor = Color.FromArgb(45, 45, 48),
                 ForeColor = Color.White,
                 Font = new Font("맑은 고딕", 10, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Padding = new Padding(0, 3, 0, 0), // 3~4픽셀 정도 아래로 밀어줍니다.
+                UseCompatibleTextRendering = true, // 렌더링 방식을 바꿔서 위치 보정
                 Cursor = Cursors.Hand
             };
             btn.FlatAppearance.BorderColor = Color.FromArgb(0, 255, 200);

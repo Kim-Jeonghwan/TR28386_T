@@ -35,7 +35,7 @@ namespace TR28386_T_PC
         public byte Epwm7aFreq { get; set; }
     }
 
-    public class SciPcProtocol
+    public class SciPcProtocol : IProtocol
     {
         private SerialPort _serialPort;
         private Thread _readThread;

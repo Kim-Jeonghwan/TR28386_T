@@ -8,7 +8,7 @@
 	Description		: 
 	Tracebility		: 
 	Programmer	    :
-	Last Updated	: 2026. 04. 13.
+	Last Updated	: 2026. 04. 17.
 
 **********************************************************************/
 
@@ -150,6 +150,7 @@ static void InitialPeripherals(void)
 	EEPROM_Init();
 	Initial_Tact();
 
+	Initial_CAN();
 
 }
 

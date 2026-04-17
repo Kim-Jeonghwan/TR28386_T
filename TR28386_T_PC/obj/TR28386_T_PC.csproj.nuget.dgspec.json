@@ -62,7 +62,11 @@
             },
             "System.IO.Ports": {
               "target": "Package",
-              "version": "[10.0.5, )"
+              "version": "[8.0.0, )"
+            },
+            "System.Management": {
+              "target": "Package",
+              "version": "[8.0.0, )"
             }
           },
           "imports": [
@@ -79,6 +83,10 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+              "version": "[8.0.25, 8.0.25]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Crossgen2.win-x64",
               "version": "[8.0.25, 8.0.25]"
             },
             {

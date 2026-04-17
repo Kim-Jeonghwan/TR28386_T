@@ -7,10 +7,6 @@
 
 /* ************************** [[   include  ]]  *********************************************************** */
 #include "main.h"
-#include "CSU_LED.h"
-#include "CSU_SCI_PC.h"
-#include "CSU_eQEP.h"
-#include "CSU_EEPROM.h"
 
 
 
@@ -120,6 +116,18 @@ static void cycle_10ms(void)
 
     // 3. 통신 메시지 송신
     sendSciPcMessage1();
+
+	// CAN 수신 처리 (폴링)
+	recvCanMessage();
+
+	// CAN 송신 데이터 최신화
+	updateCanXmtData();
+
+	// CAN 송신
+	sendCanMessage();
+
+    // CAN 상태 모니터링 (10ms 주기로 성공 여부 확인)
+    updateCanStatus();
 
 	updateEepromStatus();
 }

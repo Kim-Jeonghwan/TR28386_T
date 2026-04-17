@@ -10,3 +10,14 @@ Release/
 .theia/ 
 Debug/ 
 Release/ 
+# Build folders
+**/Debug/
+**/Release/
+**/bin/
+**/obj/
+**/publish/
+
+# Executable files
+*.exebin/ 
+obj/ 
+*.exe 
