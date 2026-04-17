@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_EPWM.c
     Description      : EPWM 7A Control
-    Last Updated     : 2026. 04. 13.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -59,9 +59,9 @@ void Initial_Epwm7a(void)
     EPwm7Regs.AQCSFRC.bit.CSFA = 1;
     
     // 초기 구조체 설정: 꺼짐, Duty 50, Freq 1 (100Hz)
-    xRcvIpcMsg1.Command.bit.Epwm7aEn = 0;
-    xRcvIpcMsg1.Epwm7aDuty = 50u;
-    xRcvIpcMsg1.Epwm7aFreq = 1u;
+    xRcvSciPcMsg1.Command.bit.Epwm7aEn = 0;
+    xRcvSciPcMsg1.Epwm7aDuty = 50u;
+    xRcvSciPcMsg1.Epwm7aFreq = 1u;
 
     // 클럭 동기화 (ePWM7 활성화)
     EALLOW;
@@ -70,11 +70,11 @@ void Initial_Epwm7a(void)
 }
 
 /**
- * @brief IPC 메시지에 따른 EPWM7A 상태 및 주파수, Duty 업데이트
+ * @brief SCI_PC 메시지에 따른 EPWM7A 상태 및 주파수, Duty 업데이트
  */
 void updateEpwm7aStatus(void)
 {
-    if (xRcvIpcMsg1.Command.bit.Epwm7aEn) 
+    if (xRcvSciPcMsg1.Command.bit.Epwm7aEn) 
     {
         if (!prevEn) 
         {
@@ -82,13 +82,13 @@ void updateEpwm7aStatus(void)
             EPwm7Regs.AQCSFRC.bit.CSFA = 0; // Resume normal PWM
         }
         
-        if ((xRcvIpcMsg1.Epwm7aFreq != prevFreq) || (xRcvIpcMsg1.Epwm7aDuty != prevDuty)) 
+        if ((xRcvSciPcMsg1.Epwm7aFreq != prevFreq) || (xRcvSciPcMsg1.Epwm7aDuty != prevDuty)) 
         {
             uint32_t prd = 0;
             uint16_t hspclkdiv = 0;
             uint16_t clkdiv = 0;
 
-            switch (xRcvIpcMsg1.Epwm7aFreq) {
+            switch (xRcvSciPcMsg1.Epwm7aFreq) {
                 case 0: // 10Hz
                     hspclkdiv = 7; // /14
                     clkdiv = 7;    // /128
@@ -136,7 +136,7 @@ void updateEpwm7aStatus(void)
             EPwm7Regs.TBPRD = (uint16_t)prd;
             
             // Duty calculation (1-100%)
-            uint16_t duty = xRcvIpcMsg1.Epwm7aDuty;
+            uint16_t duty = xRcvSciPcMsg1.Epwm7aDuty;
             if (duty > 100) duty = 100;
             if (duty < 1)   duty = 1;
             
@@ -146,8 +146,8 @@ void updateEpwm7aStatus(void)
             
             EPwm7Regs.CMPA.bit.CMPA = (uint16_t)cmpa;
 
-            prevFreq = xRcvIpcMsg1.Epwm7aFreq;
-            prevDuty = xRcvIpcMsg1.Epwm7aDuty;
+            prevFreq = xRcvSciPcMsg1.Epwm7aFreq;
+            prevDuty = xRcvSciPcMsg1.Epwm7aDuty;
         }
     } 
     else 
@@ -157,5 +157,5 @@ void updateEpwm7aStatus(void)
             EPwm7Regs.AQCSFRC.bit.CSFA = 1; // Force Low
         }
     }
-    prevEn = xRcvIpcMsg1.Command.bit.Epwm7aEn;
+    prevEn = xRcvSciPcMsg1.Command.bit.Epwm7aEn;
 }

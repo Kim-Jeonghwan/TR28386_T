@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_EEPROM.c
     Description      : EEPROM M95M04 SPI 통신 드라이버
-    Last Updated     : 2026. 04. 13.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -141,28 +141,28 @@ void EEPROM_Test(void)
 }
 
 /**
- * @brief IPC 커맨드에 따른 EEPROM 읽기/쓰기 처리 태스크
+ * @brief SCI_PC 커맨드에 따른 EEPROM 읽기/쓰기 처리 태스크
  */
 void updateEepromStatus(void)
 {
     // 1. EEPROM 쓰기 처리
-    if (xRcvIpcMsg1.Command.bit.EepWrite == true)
+    if (xRcvSciPcMsg1.Command.bit.EepWrite == true)
     {
         // 2바이트 주소와 1바이트 데이터를 사용하여 쓰기 수행
-        EEPROM_WriteByte((uint32_t)xRcvIpcMsg1.EepAddr, xRcvIpcMsg1.EepromWriteVal);
+        EEPROM_WriteByte((uint32_t)xRcvSciPcMsg1.EepAddr, xRcvSciPcMsg1.EepromWriteVal);
         
         // 명령 처리 완료 후 비트 클리어
-        xRcvIpcMsg1.Command.bit.EepWrite = false;
+        xRcvSciPcMsg1.Command.bit.EepWrite = false;
     }
 
     // 2. EEPROM 읽기 처리
-    if (xRcvIpcMsg1.Command.bit.EepRead == true)
+    if (xRcvSciPcMsg1.Command.bit.EepRead == true)
     {
         // 지정된 주소에서 데이터를 읽어 송신 메시지 구조체에 저장
-        xXmtIpcMsg1.EepromReadVal = EEPROM_ReadByte((uint32_t)xRcvIpcMsg1.EepAddr);
+        xXmtSciPcMsg1.EepromReadVal = EEPROM_ReadByte((uint32_t)xRcvSciPcMsg1.EepAddr);
         
         // 명령 처리 완료 후 비트 클리어
-        xRcvIpcMsg1.Command.bit.EepRead = false;
+        xRcvSciPcMsg1.Command.bit.EepRead = false;
     }
 }
 

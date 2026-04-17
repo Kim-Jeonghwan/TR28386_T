@@ -1,19 +1,19 @@
 /**********************************************************************
     Nexcom Co., Ltd.
-    Filename         : CSU_IPC.h
-    Description      : PC Interface Communication (IPC) Protocol Definition
-    Last Updated     : 2026. 04. 13.
+    Filename         : CSU_SCI_PC.h
+    Description      : PC Interface Communication (SCI_PC) Protocol Definition
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
-#ifndef CSU_IPC_H
-#define CSU_IPC_H
+#ifndef CSU_SCI_PC_H
+#define CSU_SCI_PC_H
 
 /* ************************** [[   include  ]]  *********************************************************** */
 #include "main.h"
 
 
 /* ************************** [[   define   ]]  *********************************************************** */
-/* 통신 패킷 관련 상수는 CSU_IPC.c에 정의됨 (SOF: 0x7E, EOT: 0x0D, ID: 0x10) */
+/* 통신 패킷 관련 상수는 CSU_SCI_PC.c에 정의됨 (SOF: 0x7E, EOT: 0x0D, ID: 0x10) */
 
 
 /* ************************** [[   enum or struct   ]]  *************************************************** */
@@ -39,19 +39,19 @@ typedef union {
         bool Epwm7aEn:1u;     // Bit 10: Epwm7a Enable
         uint16_t Reserved:5u; // Bit 11-15: Reserved
     } bit;
-} uIpcCmd;
+} uSciPcCmd;
 
 /**
  * @brief PC로부터 수신되는 메시지 구조체 (ID: 0x10)
  */
 typedef struct {
     uint16_t IncNumber;
-    uIpcCmd  Command;         // Command(2byte)
+    uSciPcCmd  Command;         // Command(2byte)
     uint16_t EepAddr;        // EEPROM 주소 (2 bytes)
     uint16_t EepromWriteVal;  // EEPROM 데이터 (1 byte)
     uint16_t Epwm7aDuty;     // Epwm7a Duty (1 byte)
     uint16_t Epwm7aFreq;     // Epwm7a Freq (1 byte)
-} stRcvIpcMsg1;
+} stRcvSciPcMsg1;
 
 
 /**
@@ -78,26 +78,27 @@ typedef struct
     uint16_t          PWMBWLPF;   // Buf[10~11]
     uint16_t          PotenRAW;   // Buf[12~13]
     uint16_t          PotenMAVE;   // Buf[14~15]
-} stXmtIpcMsg1;
+} stXmtSciPcMsg1;
 
 
 
 /* ************************** [[   global   ]]  *********************************************************** */
-extern stRcvIpcMsg1 xRcvIpcMsg1;
-extern stXmtIpcMsg1	xXmtIpcMsg1;
+extern stRcvSciPcMsg1 xRcvSciPcMsg1;
+extern stXmtSciPcMsg1	xXmtSciPcMsg1;
 
 
 
 /* ************************** [[  function  ]]  *********************************************************** */
 /**
- * @brief PC로부터 수신된 IPC 메시지를 해석하여 구조체에 저장
+ * @brief PC로부터 수신된 SCI_PC 메시지를 해석하여 구조체에 저장
  */
-void recvIpcMessage(uint16_t ID, uint16_t Data[]);
+void recvSciPcMessage(uint16_t ID, uint16_t Data[]);
 
 /**
  * @brief 현재 시스템 상태 및 엔코더 데이터를 PC로 송신 (10ms 주기)
  */
-void sendIpcMessage1(void);
+void sendSciPcMessage1(void);
 
-#endif	// #ifndef CSU_IPC_H
+#endif	// #ifndef CSU_SCI_PC_H
+
 

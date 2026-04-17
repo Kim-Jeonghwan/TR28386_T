@@ -2,13 +2,13 @@
     Nexcom Co., Ltd.
     Filename         : main.c
     Description      : 
-    Last Updated     : 2026. 04. 13.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
 #include "main.h"
 #include "CSU_LED.h"
-#include "CSU_IPC.h"
+#include "CSU_SCI_PC.h"
 #include "CSU_eQEP.h"
 #include "CSU_EEPROM.h"
 
@@ -119,7 +119,7 @@ static void cycle_10ms(void)
     updateEpwm7aStatus();
 
     // 3. 통신 메시지 송신
-    sendIpcMessage1();
+    sendSciPcMessage1();
 
 	updateEepromStatus();
 }

@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_eQEP.c
     Description      : 
-    Last Updated     : 2026. 04. 13.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -72,10 +72,10 @@ void Init_Eqep1(void)
 void EqeptoEncoder(void)
 {
 	// 1. 각도 계산
-    xXmtIpcMsg1.EncoderAngle = (uint16_t)(EQEP_getPosition(EQEP1_BASE) * (360.0f / 96.0f) * 100.0f + 0.5f); // +0.5f : 소수 1자리 반올림 위함
+    xXmtSciPcMsg1.EncoderAngle = (uint16_t)(EQEP_getPosition(EQEP1_BASE) * (360.0f / 96.0f) * 100.0f + 0.5f); // +0.5f : 소수 1자리 반올림 위함
         
     // 2. RawPD 계산
-    xXmtIpcMsg1.EncoderRawPD = (uint16_t)EQEP_getPosition(EQEP1_BASE);
+    xXmtSciPcMsg1.EncoderRawPD = (uint16_t)EQEP_getPosition(EQEP1_BASE);
 }
 
 
@@ -87,7 +87,7 @@ void updateHwSwitchStatus2(void)
         EQEP_setPosition(EQEP1_BASE, 0u); // 하드웨어 카운터 레지스터를 0으로 설정
         
         // 구조체 값도 즉시 0으로 초기화
-        xXmtIpcMsg1.EncoderAngle = 0u;
-        xXmtIpcMsg1.EncoderRawPD = 0u;
+        xXmtSciPcMsg1.EncoderAngle = 0u;
+        xXmtSciPcMsg1.EncoderRawPD = 0u;
     }
 }

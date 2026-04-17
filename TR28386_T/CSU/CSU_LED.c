@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_LED.c
     Description      : System Status LED Control (Green / Orange)
-    Last Updated     : 2026. 01. 30.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -142,16 +142,16 @@ void updateLedStatus(void)
     pLed[7] = &xLed.led07;
     pLed[8] = &xLed.led08;
 
-    // 2. IPC 메시지 데이터를 구조체 상태값으로 동기화 (기존 updateGpioLed 기능 통합)
-    // 토글 모드가 아닐 때만 IPC 메시지 값을 반영하도록 설계하는 것이 안전합니다.
-    xLed.led01.State = (bool)xRcvIpcMsg1.Command.bit.LED01;
-    xLed.led02.State = (bool)xRcvIpcMsg1.Command.bit.LED02;
-    xLed.led03.State = (bool)xRcvIpcMsg1.Command.bit.LED03;
-    xLed.led04.State = (bool)xRcvIpcMsg1.Command.bit.LED04;
-    xLed.led05.State = (bool)xRcvIpcMsg1.Command.bit.LED05;
-    xLed.led06.State = (bool)xRcvIpcMsg1.Command.bit.LED06;
-    xLed.led07.State = (bool)xRcvIpcMsg1.Command.bit.LED07;
-    xLed.led08.State = (bool)xRcvIpcMsg1.Command.bit.LED08;
+    // 2. SCI_PC 메시지 데이터를 구조체 상태값으로 동기화 (기존 updateGpioLed 기능 통합)
+    // 토글 모드가 아닐 때만 SCI_PC 메시지 값을 반영하도록 설계하는 것이 안전합니다.
+    xLed.led01.State = (bool)xRcvSciPcMsg1.Command.bit.LED01;
+    xLed.led02.State = (bool)xRcvSciPcMsg1.Command.bit.LED02;
+    xLed.led03.State = (bool)xRcvSciPcMsg1.Command.bit.LED03;
+    xLed.led04.State = (bool)xRcvSciPcMsg1.Command.bit.LED04;
+    xLed.led05.State = (bool)xRcvSciPcMsg1.Command.bit.LED05;
+    xLed.led06.State = (bool)xRcvSciPcMsg1.Command.bit.LED06;
+    xLed.led07.State = (bool)xRcvSciPcMsg1.Command.bit.LED07;
+    xLed.led08.State = (bool)xRcvSciPcMsg1.Command.bit.LED08;
 
     // 3. 전체 LED 상태 업데이트 루프
     for(i = 0u; i < 9u; i++)

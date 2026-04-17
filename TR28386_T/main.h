@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : main.h
     Description      : 
-    Last Updated     : 2026. 04. 13.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 #ifndef MAIN_H
@@ -32,7 +32,7 @@
 #include "DevTimer.h"
 #include "DevAdc.h"
 
-#include "CSU_IPC.h"
+#include "CSU_SCI_PC.h"
 #include "CSU_LED.h"
 #include "CSU_eQEP.h"
 #include "CSU_Adc.h"

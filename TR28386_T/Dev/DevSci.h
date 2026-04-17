@@ -8,7 +8,7 @@
 	Description		: 
 	Tracebility		: 
 	Programmer	    :
-	Last Updated	: 2026. 02. 02.
+	Last Updated	: 2026. 04. 17.
 
 **********************************************************************/
 
@@ -74,11 +74,11 @@ void Initial_SCI(void);
 
 
 
-__interrupt void isrScib_IPC(void);
+__interrupt void isrScib_SCI_PC(void);
 
-void xmtScib_IPC(uint16_t data[], uint16_t len);
+void xmtScib_SCI_PC(uint16_t data[], uint16_t len);
 
-void sendScib_IPC(void);
+void sendScib_SCI_PC(void);
 
 
 

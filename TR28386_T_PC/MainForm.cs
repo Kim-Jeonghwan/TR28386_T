@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : MainForm.cs
     Description      : TR28386_T Monitoring & Dashboard Main Form
-    Last Updated     : 2026. 04. 14.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 using System;
 using System.Drawing;
@@ -15,7 +15,7 @@ namespace TR28386_T_PC
 {
     public class MainForm : Form
     {
-        private IpcProtocol _protocol;
+        private SciPcProtocol _protocol;
         private System.Windows.Forms.Timer _timer;
 
         // Custom UI Colors - Dark Theme
@@ -102,7 +102,7 @@ namespace TR28386_T_PC
 
             _logForm = new LogForm();
 
-            _protocol = new IpcProtocol();
+            _protocol = new SciPcProtocol();
             _protocol.OnStatusReceived += OnStatusReceived;
             _protocol.OnCommError += OnCommError;
             _protocol.OnPortClosed += () => Invoke((Action)UpdateConnectButtons);
@@ -241,7 +241,7 @@ namespace TR28386_T_PC
             cy = 255;
             Label lblDuty = new Label { Text = "Duty(1~100):", Location = new Point(30, cy + 5), AutoSize = true };
             trbEpwmDuty = new TrackBar { Minimum = 1, Maximum = 100, Value = 50, Location = new Point(180, cy), Width = 225, TickStyle = TickStyle.None };
-            lblEpwmDutyVal = new Label { Text = "50", Location = new Point(420, cy + 5), Width = 50, Font = new Font("Consolas", 12, FontStyle.Bold) };
+            lblEpwmDutyVal = new Label { Text = "50", Location = new Point(420, cy + 5), Width = 70, Font = new Font("Consolas", 12, FontStyle.Bold) };
             trbEpwmDuty.Scroll += (s, e) =>
             {
                 lblEpwmDutyVal.Text = trbEpwmDuty.Value.ToString();

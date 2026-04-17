@@ -1,4 +1,4 @@
-﻿/**********************************************************************
+/**********************************************************************
 
 	Nexcom Co., Ltd.
 	Copyright 2021. All Rights Reserved.
@@ -8,7 +8,7 @@
 	Description		: 
 	Tracebility		: 
 	Programmer	    :
-	Last Updated	: 2026. 02. 02.
+	Last Updated	: 2026. 04. 17.
 
 **********************************************************************/
 
@@ -25,19 +25,19 @@
 
 
 /* ************************** [[   define   ]]  *********************************************************** */
-#define IPC_GPIO_PIN_SCIB_RXD	87u             // GPIO number for SCI RX
-#define IPC_GPIO_PIN_SCIB_TXD	86u             // GPIO number for SCI TX
-#define IPC_GPIO_CFG_SCIB_RXD	GPIO_87_SCIB_RX	// "pinConfig" for SCI RX
-#define IPC_GPIO_CFG_SCIB_TXD	GPIO_86_SCIB_TX	// "pinConfig" for SCI TX
+#define SCI_PC_GPIO_PIN_SCIB_RXD	87u             // GPIO number for SCI RX
+#define SCI_PC_GPIO_PIN_SCIB_TXD	86u             // GPIO number for SCI TX
+#define SCI_PC_GPIO_CFG_SCIB_RXD	GPIO_87_SCIB_RX	// "pinConfig" for SCI RX
+#define SCI_PC_GPIO_CFG_SCIB_TXD	GPIO_86_SCIB_TX	// "pinConfig" for SCI TX
 
 
 
 /* ************************** [[   global   ]]  *********************************************************** */
-static stQsci	xQueIPC;
+static stQsci	xQueSCI_PC;
 
 
 /* ************************** [[  static prototype  ]]  *************************************************** */
-static void initScib_IPC(void);
+static void initScib_SCI_PC(void);
 
 
 static void enqueueSci(stQsci *pstQ, uint16_t Data);
@@ -56,21 +56,21 @@ static uint16_t dequeueSci(stQsci *pstQ, uint16_t *pData);
 */
 void Initial_SCI(void)
 {
-	initScib_IPC();
+	initScib_SCI_PC();
 
-	memset(&xQueIPC, 0u, sizeof(xQueIPC));
+	memset(&xQueSCI_PC, 0u, sizeof(xQueSCI_PC));
 }
 
 
 /*
-@funtion	static void initScib_IPC(void)
+@funtion	static void initScib_SCI_PC(void)
 @brief		
 @param		void
 @return		static void
 @remark	
 	-	
 */
-static void initScib_IPC(void)
+static void initScib_SCI_PC(void)
 {
 	//
 	// Initialize the Device Peripherals:
@@ -79,27 +79,27 @@ static void initScib_IPC(void)
 	//
 	// GPIO87 is the SCI Rx pin.
 	//
-	GPIO_setControllerCore(IPC_GPIO_PIN_SCIB_RXD, GPIO_CORE_CPU1);
-	GPIO_setPinConfig(IPC_GPIO_CFG_SCIB_RXD);
-	GPIO_setDirectionMode(IPC_GPIO_PIN_SCIB_RXD, GPIO_DIR_MODE_IN);
-	GPIO_setPadConfig(IPC_GPIO_PIN_SCIB_RXD, GPIO_PIN_TYPE_STD);
-	GPIO_setQualificationMode(IPC_GPIO_PIN_SCIB_RXD, GPIO_QUAL_ASYNC);
+	GPIO_setControllerCore(SCI_PC_GPIO_PIN_SCIB_RXD, GPIO_CORE_CPU1);
+	GPIO_setPinConfig(SCI_PC_GPIO_CFG_SCIB_RXD);
+	GPIO_setDirectionMode(SCI_PC_GPIO_PIN_SCIB_RXD, GPIO_DIR_MODE_IN);
+	GPIO_setPadConfig(SCI_PC_GPIO_PIN_SCIB_RXD, GPIO_PIN_TYPE_STD);
+	GPIO_setQualificationMode(SCI_PC_GPIO_PIN_SCIB_RXD, GPIO_QUAL_ASYNC);
 
 	//
 	// GPIO86 is the SCI Tx pin.
 	//
-	GPIO_setControllerCore(IPC_GPIO_PIN_SCIB_TXD, GPIO_CORE_CPU1);
-	GPIO_setPinConfig(IPC_GPIO_CFG_SCIB_TXD);
-	GPIO_setDirectionMode(IPC_GPIO_PIN_SCIB_TXD, GPIO_DIR_MODE_OUT);
-	GPIO_setPadConfig(IPC_GPIO_PIN_SCIB_TXD, GPIO_PIN_TYPE_STD);
-	GPIO_setQualificationMode(IPC_GPIO_PIN_SCIB_TXD, GPIO_QUAL_ASYNC);
+	GPIO_setControllerCore(SCI_PC_GPIO_PIN_SCIB_TXD, GPIO_CORE_CPU1);
+	GPIO_setPinConfig(SCI_PC_GPIO_CFG_SCIB_TXD);
+	GPIO_setDirectionMode(SCI_PC_GPIO_PIN_SCIB_TXD, GPIO_DIR_MODE_OUT);
+	GPIO_setPadConfig(SCI_PC_GPIO_PIN_SCIB_TXD, GPIO_PIN_TYPE_STD);
+	GPIO_setQualificationMode(SCI_PC_GPIO_PIN_SCIB_TXD, GPIO_QUAL_ASYNC);
 
 
 	//
 	// Interrupts that are used in this example are re-mapped to
 	// ISR functions found within this file.
 	//
-	Interrupt_register(INT_SCIB_RX, isrScib_IPC);
+	Interrupt_register(INT_SCIB_RX, isrScib_SCI_PC);
 
 	Interrupt_enable(INT_SCIB_RX);
 	
@@ -140,16 +140,16 @@ static void initScib_IPC(void)
 
 
 /*
-@funtion	static interrupt void isrScib_IPC(void)
+@funtion	static interrupt void isrScib_SCI_PC(void)
 @brief		
 @param		void
 @return		[ static interrupt void ]	
 @remark	
 	-	
 */
-__interrupt void isrScib_IPC(void)
+__interrupt void isrScib_SCI_PC(void)
 {
-	static stSciB	xRcvIPC;
+	static stSciB	xRcvSCI_PC;
 
     uint16_t Data[1u];
 
@@ -157,69 +157,69 @@ __interrupt void isrScib_IPC(void)
     // 현재 레벨이 1이므로 1바이트씩 처리하는 로직을 유지
     SCI_readCharArray(SCIB_BASE, Data, 1u);
 
-  	switch(xRcvIPC.Frame)
+  	switch(xRcvSCI_PC.Frame)
   	{
   	case eSciB_SOF:
   		if(Data[0u] == 0x7Eu)
   		{
-  			xRcvIPC.Frame	= eSciB_MSGID;
-  			xRcvIPC.POS	= 0u;
-  			xRcvIPC.CRC	= 0u;
+  			xRcvSCI_PC.Frame	= eSciB_MSGID;
+  			xRcvSCI_PC.POS	= 0u;
+  			xRcvSCI_PC.CRC	= 0u;
   		}
   	break;
 
   	case eSciB_MSGID:
-		xRcvIPC.MSGID	= Data[0u];
-		xRcvIPC.Frame	= eSciB_LEN;
+		xRcvSCI_PC.MSGID	= Data[0u];
+		xRcvSCI_PC.Frame	= eSciB_LEN;
   	break;
 
   	case eSciB_LEN:
-		xRcvIPC.LEN	= Data[0u];
-		xRcvIPC.CRC	= Data[0u];			// LEN 포함 합산
-		xRcvIPC.POS = 0u;				// POS 초기화 보장
+		xRcvSCI_PC.LEN	= Data[0u];
+		xRcvSCI_PC.CRC	= Data[0u];			// LEN 포함 합산
+		xRcvSCI_PC.POS = 0u;				// POS 초기화 보장
         
-        if(xRcvIPC.LEN > 0u)
+        if(xRcvSCI_PC.LEN > 0u)
         {
-            xRcvIPC.LEN--;              // 보정: LEN 필드가 자기 자신을 포함하므로 실제 데이터는 LEN-1개
-            xRcvIPC.Frame = eSciB_DATA;
+            xRcvSCI_PC.LEN--;              // 보정: LEN 필드가 자기 자신을 포함하므로 실제 데이터는 LEN-1개
+            xRcvSCI_PC.Frame = eSciB_DATA;
         }
         else
         {
-            xRcvIPC.Frame = eSciB_CRC;   // 데이터가 없는 경우
+            xRcvSCI_PC.Frame = eSciB_CRC;   // 데이터가 없는 경우
         }
   	break;
 
   	case eSciB_DATA:
-		xRcvIPC.DATA[xRcvIPC.POS++] = (Data[0u] & 0x00FFu); // 하위 8비트만 명시
-		xRcvIPC.CRC += (Data[0u] & 0x00FFu);
-		xRcvIPC.LEN--;                          // 남은 개수 하나 감소
-        if(xRcvIPC.LEN == 0u)                   // 다 받았으면 CRC 단계로
+		xRcvSCI_PC.DATA[xRcvSCI_PC.POS++] = (Data[0u] & 0x00FFu); // 하위 8비트만 명시
+		xRcvSCI_PC.CRC += (Data[0u] & 0x00FFu);
+		xRcvSCI_PC.LEN--;                          // 남은 개수 하나 감소
+        if(xRcvSCI_PC.LEN == 0u)                   // 다 받았으면 CRC 단계로
         {
-            xRcvIPC.Frame = eSciB_CRC;
+            xRcvSCI_PC.Frame = eSciB_CRC;
         }	
   	break;
 
   	case eSciB_CRC:
-  		if((xRcvIPC.CRC & 0xFFu) == Data[0u])
+  		if((xRcvSCI_PC.CRC & 0xFFu) == Data[0u])
   		{
-			xRcvIPC.Frame	= eSciB_EOT;	// 맞으면 EOT 대기
+			xRcvSCI_PC.Frame	= eSciB_EOT;	// 맞으면 EOT 대기
 		}
 		else
 		{
-			xRcvIPC.Frame	= eSciB_SOF;	// 틀리면 SOF 로
+			xRcvSCI_PC.Frame	= eSciB_SOF;	// 틀리면 SOF 로
 		}
   	break;  	
 
   	case eSciB_EOT:
 		if(Data[0u] == 0x0Du)	// 마지막 바이트 0x0D 인지 체크
 		{
-			recvIpcMessage(xRcvIPC.MSGID, xRcvIPC.DATA);
+			recvSciPcMessage(xRcvSCI_PC.MSGID, xRcvSCI_PC.DATA);
 		}
-		xRcvIPC.Frame	= eSciB_SOF;	// 성공하든 실패하든 초기화
+		xRcvSCI_PC.Frame	= eSciB_SOF;	// 성공하든 실패하든 초기화
   	break;  	
   	
   	default:
-  		xRcvIPC.Frame = eSciB_SOF;
+  		xRcvSCI_PC.Frame = eSciB_SOF;
   	break;
   	}
 
@@ -236,7 +236,7 @@ __interrupt void isrScib_IPC(void)
 
 
 /*
-@funtion	void xmtScib_IPC(uint16_t data[], uint16_t len)
+@funtion	void xmtScib_SCI_PC(uint16_t data[], uint16_t len)
 @brief		
 @param		[ uint16_t data[] ]	
 @param		[ uint16_t len ]	
@@ -244,14 +244,14 @@ __interrupt void isrScib_IPC(void)
 @remark	
 	-	
 */
-void xmtScib_IPC(uint16_t data[], uint16_t len)
+void xmtScib_SCI_PC(uint16_t data[], uint16_t len)
 {
 #if 1 // 2025-08-05 9:13:57
 	uint16_t i = 0u;
 
 	for(i = 0u; i < len; i++)
 	{
-		enqueueSci(&xQueIPC, data[i]);
+		enqueueSci(&xQueSCI_PC, data[i]);
 	}
 #else
 	SCI_writeCharArray(SCIB_BASE, data, len);
@@ -261,14 +261,14 @@ void xmtScib_IPC(uint16_t data[], uint16_t len)
 
 
 /*
-@funtion	void sendScib_IPC(void)
+@funtion	void sendScib_SCI_PC(void)
 @brief		100 us  ?         
 @param		void
 @return		void
 @remark	
 	-	ref isr_CpuTimer0()
 */
-void sendScib_IPC(void)
+void sendScib_SCI_PC(void)
 {
     uint16_t i = 0u;
     uint16_t len = 0u;
@@ -277,7 +277,7 @@ void sendScib_IPC(void)
 
     for(i = 0u; i < 20u; i++)
     {
-        if(dequeueSci(&xQueIPC, &popData) == 1u)
+        if(dequeueSci(&xQueSCI_PC, &popData) == 1u)
         {
             sendData[len ++] = popData;
         }

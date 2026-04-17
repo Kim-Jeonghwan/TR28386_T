@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_Tact.h
     Description      : Tact Switch Input Control (GPIO 64, 65)
-    Last Updated     : 2026. 04. 13.
+    Last Updated     : 2026. 04. 17.
 **********************************************************************/
 
 #ifndef CSU_TACT_H
@@ -30,7 +30,7 @@ void initGpioDinTact(void);
 void Initial_Tact(void);
 
 /**
- * @brief Tact 스위치 상태 업데이트 (GPIO 64, 65 -> xXmtIpcMsg1)
+ * @brief Tact 스위치 상태 업데이트 (GPIO 64, 65 -> xXmtSciPcMsg1)
  */
 void updateTactStatus(void);
 
