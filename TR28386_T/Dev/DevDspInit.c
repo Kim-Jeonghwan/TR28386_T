@@ -151,6 +151,7 @@ static void InitialPeripherals(void)
 	Initial_Tact();
 
 	Initial_CAN();
+	Initial_IPC();
 
 }
 

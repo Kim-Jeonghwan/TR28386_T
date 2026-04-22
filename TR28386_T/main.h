@@ -32,6 +32,7 @@
 #include "DevTimer.h"
 #include "DevAdc.h"
 #include "DevCan.h"
+#include "DevIPC.h"
 
 #include "CSU_SCI_PC.h"
 #include "CSU_LED.h"
@@ -41,6 +42,7 @@
 #include "CSU_Tact.h"
 #include "CSU_EPWM.h"
 #include "CSU_CAN.h"
+#include "CSU_IPC.h"
 
 
 /* ************************** [[   define   ]]  *********************************************************** */
