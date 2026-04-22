@@ -1,7 +1,7 @@
 /**********************************************************************
     Nexcom Co., Ltd.
     Filename         : DevTimer.h
-    Description      : CM Core SysTick Timer Header
+    Description      : CM Core SysTick 타이머 헤더
     Last Updated     : 2026. 04. 22.
 **********************************************************************/
 #ifndef DEVTIMER_H
@@ -23,12 +23,12 @@ typedef struct
 
 extern stTimer xTimer;
 
-// Timer Initialization
+// 타이머 초기화
 extern void Initial_TIMER(void);
 
-// CPU Timer Interrupt Handlers
-extern void isr_CpuTimer0(void); // Ethernet Tx
-extern void isr_CpuTimer1(void); // Periodic Tasks
-extern void isr_CpuTimer2(void); // Hz Measurement
+// CPU 타이머 인터럽트 핸들러
+extern void isr_CpuTimer0(void); // 이더넷 송신
+extern void isr_CpuTimer1(void); // 주기적 작업
+extern void isr_CpuTimer2(void); // Hz 측정
 
 #endif // DEVTIMER_H

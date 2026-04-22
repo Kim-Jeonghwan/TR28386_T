@@ -1,8 +1,8 @@
 /**********************************************************************
     Nexcom Co., Ltd.
     Filename         : CSU_IPC.c
-    Description      : CM Core IPC Communication Protocol Definition
-    Last Updated     : 2026. 04. 21.
+    Description      : CM Core IPC 통신 프로토콜 정의
+    Last Updated     : 2026. 04. 22.
 **********************************************************************/
 
 #include "CSU_IPC.h"

@@ -1,8 +1,8 @@
 /**********************************************************************
     Nexcom Co., Ltd.
     Filename         : CSU_IPC.h
-    Description      : CM Core IPC Communication Protocol Definition
-    Last Updated     : 2026. 04. 21.
+    Description      : CM Core IPC 통신 프로토콜 정의
+    Last Updated     : 2026. 04. 22.
 **********************************************************************/
 
 #ifndef CSU_IPC_H
@@ -25,10 +25,10 @@ typedef struct {
 extern stRcvIpcMsg xRcvIpcCmMsg;
 extern stXmtIpcMsg xXmtIpcCmMsg;
 
-// Process received IPC message from CM
+// CM으로부터 수신된 IPC 메시지 처리
 void recvIpcCmMessage(uint32_t command, uint32_t addr, uint32_t data);
 
-// Send message to CM
+// CM으로 메시지 전송
 void sendIpcCmMessage1(void);
 
 #endif // CSU_IPC_H
