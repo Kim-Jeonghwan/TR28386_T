@@ -8,7 +8,7 @@
 	Description		: 
 	Tracebility		: 
 	Programmer	    :
-	Last Updated	: 2026. 04. 17.
+	Last Updated	: 2026. 04. 22.
 
 **********************************************************************/
 
@@ -37,6 +37,7 @@ static void Init_GpioDin(void);
 static void Init_GpioDout(void);
 
 static void InitialPeripherals(void);
+static void Initial_CmCore(void);
 
 
 /* ************************** [[  function  ]]  *********************************************************** */
@@ -63,6 +64,9 @@ void DSP_Initialization(void)
 
 
 	InitialPeripherals();
+
+    // --- CM 코어 부팅 (Reset 해제) ---
+    Initial_CmCore();
 
 	// 실시간 디버깅 활성화, 전역 인터럽트 스위치 ON
 	ERTM;	// Debug Enable Mask 비트 설정 (실시간 디버깅이 가능하도록 ST1 레지스터의 /DBGM 비트를 0으로 클리어)
@@ -101,6 +105,11 @@ static void Initial_GPIO(void)
 static void Init_GpioDin(void)
 {
     initGpioDinTact();
+
+    // GPIO 1: 입력 설정 (GND 체크용)
+    GPIO_setPinConfig(GPIO_1_GPIO1);
+    GPIO_setPadConfig(1, GPIO_PIN_TYPE_PULLUP);
+    GPIO_setDirectionMode(1, GPIO_DIR_MODE_IN);
 }
 
 
@@ -117,6 +126,11 @@ static void Init_GpioDout(void)
 {
 	initGpioDoutLed();
 
+    // GPIO 31: 출력 설정 (CM 제어 테스트용)
+    GPIO_setPinConfig(GPIO_31_GPIO31);
+    GPIO_setPadConfig(31, GPIO_PIN_TYPE_STD);
+    GPIO_setDirectionMode(31, GPIO_DIR_MODE_OUT);
+    GPIO_setMasterCore(31, GPIO_CORE_CPU1); // 초기 권한은 CPU1
 }
 
 
@@ -153,6 +167,24 @@ static void InitialPeripherals(void)
 	Initial_CAN();
 	Initial_IPC();
 
+}
+
+/*
+@funtion	static void Initial_CmCore(void)
+@brief		CM 코어 부팅 및 클럭 설정
+@param		void
+@return		static void
+*/
+static void Initial_CmCore(void)
+{
+    // CM 클럭 활성화 (안전한 플래시 쓰기를 위해 100MHz로 설정)
+    SysCtl_setCMClk(SYSCTL_CMCLKOUT_DIV_2, SYSCTL_SOURCE_SYSPLL);
+
+#ifdef _FLASH
+    Device_bootCM(BOOTMODE_BOOT_TO_FLASH_SECTOR0);
+#else
+    Device_bootCM(BOOTMODE_BOOT_TO_S0RAM);
+#endif
 }
 
 

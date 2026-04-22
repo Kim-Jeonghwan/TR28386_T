@@ -22,6 +22,7 @@ void Initial_TIMER(void)
     Interrupt_registerHandler(INT_TIMER0, isr_CpuTimer0);
     CPUTimer_enableInterrupt(CPUTIMER0_BASE);
     CPUTimer_startTimer(CPUTIMER0_BASE);
+    Interrupt_enable(INT_TIMER0);
 
     // --- CPU 타이머 1 초기화 (주기적 작업용: 1ms) ---
     CPUTimer_setPeriod(CPUTIMER1_BASE, 125000U); // 1ms @ 125MHz
@@ -31,6 +32,7 @@ void Initial_TIMER(void)
     Interrupt_registerHandler(INT_TIMER1, isr_CpuTimer1);
     CPUTimer_enableInterrupt(CPUTIMER1_BASE);
     CPUTimer_startTimer(CPUTIMER1_BASE);
+    Interrupt_enable(INT_TIMER1);
 
     // --- CPU 타이머 2 초기화 (Hz 측정용: 1000ms = 1s) ---
     CPUTimer_setPeriod(CPUTIMER2_BASE, 125000000U); // 1s @ 125MHz
@@ -40,6 +42,7 @@ void Initial_TIMER(void)
     Interrupt_registerHandler(INT_TIMER2, isr_CpuTimer2);
     CPUTimer_enableInterrupt(CPUTIMER2_BASE);
     CPUTimer_startTimer(CPUTIMER2_BASE);
+    Interrupt_enable(INT_TIMER2);
 }
 
 // 타이머 0: 이더넷 송신 핸들러 (1ms)
