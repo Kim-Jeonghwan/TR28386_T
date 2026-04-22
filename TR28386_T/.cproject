@@ -160,8 +160,16 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.ABI.969511725" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.ABI" value="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.ABI.eabi" valueType="enumerated"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.INCLUDE_PATH.1049356157" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.INCLUDE_PATH" valueType="includePath">
                                     <listOptionValue value="${SYSCONFIG_TOOL_INCLUDE_PATH}"/>
+                                    <listOptionValue value="${COM_TI_C2000WARE_INCLUDE_PATH}"/>
                                     <listOptionValue value="${PROJECT_ROOT}"/>
                                     <listOptionValue value="${CG_TOOL_ROOT}/include"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\SDK\common\include"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\SDK\headers\include"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\SDK\driverlib"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\SDK\driverlib\inc"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\Dev"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\CSU"/>
+                                    <listOptionValue value="${PROJECT_ROOT}\targetConfigs"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.DIAG_WARNING.1872659562" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.DIAG_WARNING" valueType="stringList">
                                     <listOptionValue value="225"/>
@@ -170,6 +178,12 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.DISPLAY_ERROR_NUMBER.1324101350" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.DISPLAY_ERROR_NUMBER" value="true" valueType="boolean"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.DEFINE.477479388" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.compilerID.DEFINE" valueType="definedSymbols">
                                     <listOptionValue value="${SYSCONFIG_TOOL_SYMBOLS}"/>
+                                    <listOptionValue value="${COM_TI_C2000WARE_SYMBOLS}"/>
+                                    <listOptionValue value="CPU1"/>
+                                    <listOptionValue value="_FLASH"/>
+                                    <listOptionValue value="USE_20MHZ_XTAL"/>
+                                    <listOptionValue value="_DUAL_HEADERS"/>
+                                    <listOptionValue value="DONT_DECLARE_IFR_IER"/>
                                 </option>
                             </tool>
                             <tool id="com.ti.ccstudio.buildDefinitions.C2000_22.6.exe.linkerRelease.359813571" name="C2000 Linker" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.exe.linkerRelease">
@@ -178,10 +192,12 @@
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.linkerID.OUTPUT_FILE.1852279279" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.linkerID.OUTPUT_FILE" value="${ProjName}.out" valueType="string"/>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.linkerID.LIBRARY.761061432" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.linkerID.LIBRARY" valueType="libs">
                                     <listOptionValue value="${SYSCONFIG_TOOL_LIBRARIES}"/>
+                                    <listOptionValue value="${COM_TI_C2000WARE_LIBRARIES}"/>
                                     <listOptionValue value="libc.a"/>
                                 </option>
                                 <option id="com.ti.ccstudio.buildDefinitions.C2000_22.6.linkerID.SEARCH_PATH.1999253671" superClass="com.ti.ccstudio.buildDefinitions.C2000_22.6.linkerID.SEARCH_PATH" valueType="libPaths">
                                     <listOptionValue value="${SYSCONFIG_TOOL_LIBRARY_PATH}"/>
+                                    <listOptionValue value="${COM_TI_C2000WARE_LIBRARY_PATH}"/>
                                     <listOptionValue value="${CG_TOOL_ROOT}/lib"/>
                                     <listOptionValue value="${CG_TOOL_ROOT}/include"/>
                                 </option>
@@ -197,6 +213,9 @@
                             </tool>
                         </toolChain>
                     </folderInfo>
+                    <sourceEntries>
+                        <entry excluding="SDK/headers/cmd/f2838x_headers_BIOS_cpu1.cmd|SDK/headers/cmd/f2838x_headers_BIOS_cpu2.cmd|SDK/headers/cmd/f2838x_headers_nonBIOS_cpu2.cmd|SDK/common/cmd/2838x_RAM_lnk_cpu1.cmd|SDK/driverlib/mcan.c|SDK/driverlib/pmbus.c|SDK/driverlib/ccs" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+                    </sourceEntries>
                 </configuration>
             </storageModule>
             <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
