@@ -26,6 +26,8 @@ MEMORY
    S2RAM            : origin = 0x20008000, length = 0x00004000
    S3RAM            : origin = 0x2000C000, length = 0x00004000
    E0RAM            : origin = 0x20010000, length = 0x00004000
+   GSRAM0           : origin = 0x20014000, length = 0x00002000
+   GSRAM1           : origin = 0x20016000, length = 0x00002000
 
    CPU1TOCMMSGRAM0  : origin = 0x20080000, length = 0x00000800
    CPU1TOCMMSGRAM1  : origin = 0x20080800, length = 0x00000800
@@ -60,6 +62,9 @@ SECTIONS
     MSGRAM_CM_TO_CPU2 : > CMTOCPU2MSGRAM0, type=NOINIT
     MSGRAM_CPU1_TO_CM : > CPU1TOCMMSGRAM0, type=NOINIT
     MSGRAM_CPU2_TO_CM : > CPU2TOCMMSGRAM0, type=NOINIT
+
+    gs0_section       : > GSRAM0, type=NOINIT
+    gs1_section       : > GSRAM1, type=NOINIT
 
     .TI.ramfunc : {} LOAD = CMBANK0_SECTOR0,
                      RUN = C0RAM,

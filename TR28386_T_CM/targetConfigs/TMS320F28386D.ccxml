@@ -10,21 +10,24 @@
             <instance id="drivers" XML_version="1.2" xmlpath="drivers" xml="tixds100v2cs_dap.xml" href="drivers/tixds100v2cs_dap.xml"/>
             <instance id="drivers" XML_version="1.2" xmlpath="drivers" xml="tixds100v2cortexM.xml" href="drivers/tixds100v2cortexM.xml"/>
             <instance id="drivers" XML_version="1.2" xmlpath="drivers" xml="tixds510ajsm.xml" href="drivers/tixds510ajsm.xml"/>
+            <property id="The Converter Usage" Type="choicelist" Value="1">
+                <choice Name="Its bypassed, use 1149.1, mimic XDS100v2" value="nothing">
+                    <property id="The Emulator 1149.1 Frequency" Type="choicelist" Value="3">
+                        <choice Name="Adaptive with user specified limit" value="adaptive">
+                            <property id="-- Enter a value from 488Hz to 30.0MHz" Type="stringfield" Value="15.0MHz"/>
+                        </choice>
+                    </property>
+                </choice>
+                <choice Name="Generate 1149.7 4-pin standard mode" value="enable">
+                    <property id="The Emulator 1149.1 Frequency" Type="choicelist" Value="1">
+                        <choice Name="Adaptive with user specified limit" value="adaptive">
+                            <property id="-- Enter a value from 488Hz to 30.0MHz" Type="stringfield" Value="15.0MHz"/>
+                        </choice>
+                    </property>
+                </choice>
+            </property>
             <platform XML_version="1.2" id="platform_0">
                 <instance id="TMS320F28386D" XML_version="1.2" xmlpath="devices" xml="f28386d.xml" href="devices/f28386d.xml" desc="TMS320F28386D"/>
-                <device XML_version="1.2" id="TMS320F28386D" partnum="TMS320F28386D" HW_revision="1" description="">
-                    <router XML_version="1.2" id="IcePick_C_0" HW_revision="1.0" isa="ICEPICK_C" description="ICEPick_C router">
-                        <subpath id="CM">
-                            <router XML_version="1.2" id="CS_DAP_0" HW_revision="1.0" isa="CS_DAP" description="CS_DAP router">
-                                <subpath id="CortexM4">
-                                    <cpu XML_version="1.2" id="Cortex_M4_0" HW_revision="1.0" isa="Cortex_M4" description="Cortex_M4 CPU">
-                                        <property id="Slave Processor" Type="choicelist" Value="0"/>
-                                    </cpu>
-                                </subpath>
-                            </router>
-                        </subpath>
-                    </router>
-                </device>
             </platform>
         </connection>
     </configuration>

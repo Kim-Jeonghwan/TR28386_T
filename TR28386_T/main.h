@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : main.h
     Description      : 
-    Last Updated     : 2026. 04. 17.
+    Last Updated     : 2026. 04. 23.
 **********************************************************************/
 
 #ifndef MAIN_H
@@ -19,6 +19,10 @@
 // _DUAL_HEADERS가 선언되어 있어야 두 방식을 병행 가능합니다.
 #include "driverlib.h"
 #include "device.h"
+#include "memcfg.h"
+#ifndef MEMCFG_GSRAMMASTER_CM
+#define MEMCFG_GSRAMMASTER_CM    2
+#endif
 
 /* Bit-field 헤더 포함 */
 // f28x_project.h 내부의 Uint16 등과 충돌을 피하기 위해 

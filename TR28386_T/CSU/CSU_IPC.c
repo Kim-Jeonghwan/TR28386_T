@@ -1,8 +1,8 @@
 /**********************************************************************
     Nexcom Co., Ltd.
     Filename         : CSU_IPC.c
-    Description      : CM Core IPC 통신 프로토콜 정의
-    Last Updated     : 2026. 04. 22.
+    Description      : CM Core IPC 통신 프로토콜 구현
+    Last Updated     : 2026. 04. 27.
 **********************************************************************/
 
 #include "CSU_IPC.h"
@@ -10,8 +10,12 @@
 stRcvIpcMsg xRcvIpcCmMsg;
 stXmtIpcMsg xXmtIpcCmMsg;
 
+// Message RAM 영역에 구조체 포인터 할당
+volatile stIpcDataPacket *pxIpcCpu1ToCm = (volatile stIpcDataPacket *)IPC_CPU1_TO_CM_MSGRAM_ADDR;
+volatile stIpcDataPacket *pxIpcCmToCpu1 = (volatile stIpcDataPacket *)IPC_CM_TO_CPU1_MSGRAM_ADDR;
+
 /**
- * @brief CM으로부터 수신된 IPC 메시지 처리 (이더넷 데이터 수신)
+ * @brief CM으로부터 수신된 IPC 메시지 처리
  * @param command 수신된 명령
  * @param addr 수신된 주소 (필요 시 데이터 포인터)
  * @param data 수신된 데이터
@@ -22,7 +26,6 @@ void recvIpcCmMessage(uint32_t command, uint32_t addr, uint32_t data)
     xRcvIpcCmMsg.Address = addr;
     xRcvIpcCmMsg.Data = data;
 
-    // TODO: CM에서 받은 이더넷 데이터에 대한 처리 구현
     switch(xRcvIpcCmMsg.Command)
     {
         case 0x01u:
@@ -35,7 +38,7 @@ void recvIpcCmMessage(uint32_t command, uint32_t addr, uint32_t data)
 }
 
 /**
- * @brief CM으로 보낼 데이터 전송 (이더넷 송신)
+ * @brief CM으로 보낼 데이터 전송
  */
 void sendIpcCmMessage1(void)
 {
@@ -44,4 +47,23 @@ void sendIpcCmMessage1(void)
     uint32_t sendData = xXmtIpcCmMsg.Data;
     
     sendIpcMessageToCM(sendCmd, sendAddr, sendData);
+}
+/**
+ * @brief CM으로 대용량 데이터 전송 예시
+ */
+void sendBulkDataToCM(uint32_t cmd, uint32_t *data, uint16_t length)
+{
+    uint16_t i;
+    
+    // 1. Message RAM 구조체에 데이터 채우기
+    pxIpcCpu1ToCm->Command = cmd;
+    pxIpcCpu1ToCm->Status = 0x01; // Busy or Data Ready
+    
+    for(i = 0; i < length && i < 16; i++)
+    {
+        pxIpcCpu1ToCm->Payload[i] = data[i];
+    }
+    
+    // 2. IPC Flag를 Set하여 CM에게 데이터가 준비되었음을 알림 (예: IPC_FLAG0)
+    IPC_setFlagLtoR(IPC_CPU1_L_CM_R, IPC_FLAG0);
 }

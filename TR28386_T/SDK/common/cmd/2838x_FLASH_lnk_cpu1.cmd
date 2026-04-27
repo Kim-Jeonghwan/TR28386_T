@@ -92,6 +92,9 @@ SECTIONS
 
    ramgs0 : > RAMGS0, type=NOINIT
    ramgs1 : > RAMGS1, type=NOINIT
+
+   gs0_section : > RAMGS0, type=NOINIT
+   gs1_section : > RAMGS1, type=NOINIT
    
    MSGRAM_CPU1_TO_CPU2 : > CPU1TOCPU2RAM, type=NOINIT
    MSGRAM_CPU2_TO_CPU1 : > CPU2TOCPU1RAM, type=NOINIT
