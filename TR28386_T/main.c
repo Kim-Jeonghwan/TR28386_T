@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : main.c
     Description      : 
-    Last Updated     : 2026. 04. 17.
+    Last Updated     : 2026. 04. 30. (1ms 복구 및 반응속도 최적화)
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -55,6 +55,12 @@ void main(void)
 			xTimer.Cycle_1ms = 0u;
 		}
 
+		if(xTimer.Cycle_1ms >= 1u)
+		{
+			cycle_1ms();
+			xTimer.Cycle_1ms = 0u;
+		}
+
 		if(xTimer.Cycle_10ms >= 10u)
 		{
 			cycle_10ms();
@@ -93,7 +99,6 @@ static void cycle_1ms(void)
 
 
 
-
 /*
 @funtion	static void cycle_10ms(void)
 @brief		10ms 마다 수행 하는 동작 
@@ -116,6 +121,9 @@ static void cycle_10ms(void)
 
     // 3. 통신 메시지 송신
     sendSciPcMessage1();
+
+    // 이더넷 루프백 테스트 업데이트
+    updateLoopbackTest();
 
 	// CAN 수신 처리 (폴링)
 	recvCanMessage();

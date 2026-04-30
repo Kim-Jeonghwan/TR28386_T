@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_IPC.c
     Description      : IPC Protocol (CM to CPU1) 구현 및 이더넷 공유 메모리 처리
-    Last Updated     : 2026. 04. 23.
+    Last Updated     : 2026. 04. 30.
 **********************************************************************/
 
 #include "CSU_IPC.h"
@@ -21,9 +21,14 @@ void recvIpcCpu1Message(uint32_t command, uint32_t addr, uint32_t data)
     {
         // addr는 CPU1이 보낸 GSRAM1의 CM 주소
         stEthPacketBuffer *pXmtData = (stEthPacketBuffer *)addr;
+        (void)pXmtData;
         
         // TODO: 실제 이더넷 드라이버를 통해 데이터 전송
         // 예: Ethernet_sendPacket(pXmtData->Data, pXmtData->Length);
+    }
+    else if(command >= 0x10 && command <= 0x13)
+    {
+        sendEthernetLoopbackPacket((uint8_t)command);
     }
 }
 

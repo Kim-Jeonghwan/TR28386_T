@@ -10,6 +10,8 @@ namespace TR28386_T_PC
     {
         public bool Tact01 { get; set; }
         public bool Tact02 { get; set; }
+        public bool EthLoop1 { get; set; }
+        public bool EthLoop2 { get; set; }
         public double EncoderAngle { get; set; }
         public ushort EncoderRawPD { get; set; }
         public byte EepromReadVal { get; set; }
@@ -28,6 +30,7 @@ namespace TR28386_T_PC
         public bool EepWrite { get; set; }
         public bool EepRead { get; set; }
         public bool Epwm7aEn { get; set; }
+        public bool LoopbackTest { get; set; }
 
         public ushort EepAddr { get; set; }
         public byte EepromWriteVal { get; set; }
@@ -113,6 +116,7 @@ namespace TR28386_T_PC
                 if (ctrlDto.EepWrite) commandVal |= (1 << 8);
                 if (ctrlDto.EepRead) commandVal |= (1 << 9);
                 if (ctrlDto.Epwm7aEn) commandVal |= (1 << 10);
+                if (ctrlDto.LoopbackTest) commandVal |= (1 << 11);
 
                 byte[] packet = new byte[13];
                 packet[0] = 0x7E;
@@ -229,6 +233,8 @@ namespace TR28386_T_PC
                             ushort statusBits = buffer[pos++];
                             status.Tact01 = (statusBits & 0x01) != 0;
                             status.Tact02 = (statusBits & 0x02) != 0;
+                            status.EthLoop1 = (statusBits & 0x04) != 0;
+                            status.EthLoop2 = (statusBits & 0x08) != 0;
 
                             ushort encAngleRaw = (ushort)(buffer[pos++] | (buffer[pos++] << 8));
                             status.EncoderAngle = encAngleRaw / 100.0;

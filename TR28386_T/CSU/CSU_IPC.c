@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_IPC.c
     Description      : CM Core IPC 통신 프로토콜 구현
-    Last Updated     : 2026. 04. 27.
+    Last Updated     : 2026. 04. 30. (2ms 보고 대응)
 **********************************************************************/
 
 #include "CSU_IPC.h"
@@ -30,6 +30,28 @@ void recvIpcCmMessage(uint32_t command, uint32_t addr, uint32_t data)
     {
         case 0x01u:
             // 예시 명령어 1 처리
+            break;
+            
+        case 0x20u: // IPC_CMD_LOOPBACK_ON_RX (from CM)
+            xLed.led01.State = true; 
+            sendIpcMessageToCM(0x12, 0, 0); // IPC_ACK_LOOPBACK_ON
+            sendSciPcMessage1();            // 즉시 PC 보고 (2ms 이내 응답 보장)
+            break;
+            
+        case 0x21u: // IPC_CMD_LOOPBACK_OFF_RX
+            xLed.led01.State = false;
+            sendIpcMessageToCM(0x13, 0, 0); // IPC_ACK_LOOPBACK_OFF
+            sendSciPcMessage1();            // 즉시 PC 보고
+            break;
+            
+        case 0x22u: // IPC_ACK_LOOPBACK_ON_RX
+            xLed.led02.State = true;
+            sendSciPcMessage1();            // 즉시 PC 보고
+            break;
+            
+        case 0x23u: // IPC_ACK_LOOPBACK_OFF_RX
+            xLed.led02.State = false;
+            sendSciPcMessage1();            // 즉시 PC 보고
             break;
             
         default:

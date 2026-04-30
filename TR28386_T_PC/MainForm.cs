@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : MainForm.cs
     Description      : TR28386_T Monitoring & Dashboard Main Form
-    Last Updated     : 2026. 04. 17.
+    Last Updated     : 2026. 04. 30. (CAN 모드 시 루프백 비활성화)
 **********************************************************************/
 using System;
 using System.Drawing;
@@ -57,6 +57,7 @@ namespace TR28386_T_PC
         private Label lblPotenMAVE;
         private Label lblEepromReadValStatus;
         private Label lblIncNumber;
+        private Label[] lblEthLoops; // 0=CM Rcv, 1=Roundtrip
 
         // Controls
         private Button[] btnControlLEDs;
@@ -95,7 +96,7 @@ namespace TR28386_T_PC
         public MainForm()
         {
             this.Text = "TR28386_T Monitoring & Dashboard";
-            this.Size = new Size(2100, 1350); // Increased height to accommodate MenuStrip
+            this.Size = new Size(2100, 1500); // Increased height to accommodate Loopback panel
             this.MaximumSize = this.Size;
             this.MinimumSize = this.Size;
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
@@ -112,7 +113,7 @@ namespace TR28386_T_PC
             SetupProtocolEvents();
             SetupMenu(); // Add standard Windows menu
 
-            _timer = new System.Windows.Forms.Timer { Interval = 100 };
+            _timer = new System.Windows.Forms.Timer { Interval = 10 }; // 10ms 주기로 변경
             _timer.Tick += Timer_Tick;
 
             BuildUI();
@@ -142,13 +143,14 @@ namespace TR28386_T_PC
             TableLayoutPanel mainLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                RowCount = 4,
+                RowCount = 5,
                 ColumnCount = 3,
                 Padding = new Padding(15, 40, 15, 15) // Top padding increased for MenuStrip
             };
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 270)); // Comm row (Increased from 195)
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 380)); // Status row
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 390)); // Control row
+            mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 120)); // Loopback row
             mainLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110)); // Log row
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 675));
             mainLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 600));
@@ -245,7 +247,7 @@ namespace TR28386_T_PC
 
             lblIncNumber = CreateLabelValue("Seq (IncNumber):", "", 30, 315, pnlStatus);
 
-            pnlStatus.Height = 270;
+            pnlStatus.Height = 380;
 
             // Control LED panel
             Panel pnlCtrls = CreateStyledPanel("MCU Controls (Control Message)");
@@ -335,14 +337,52 @@ namespace TR28386_T_PC
             pnlEep.Height = 350;
             pnlEep.Name = "pnlEep"; // Name for easy access
 
+            // Ethernet Loopback Panel (Row 3, Spans 2 columns)
+            Panel pnlLoopback = CreateStyledPanel("Ethernet Loopback Test");
+            pnlLoopback.Name = "pnlLoopback";
+            pnlLoopback.Dock = DockStyle.Fill;
+            pnlLoopback.Margin = new Padding(5);
+
+            Button btnLoopbackOn = CreateBorderedButton("켬 (ON)", 35, 45, 135, 50);
+            Button btnLoopbackOff = CreateBorderedButton("끔 (OFF)", 200, 45, 135, 50);
+
+            btnLoopbackOn.BackColor = Color.FromArgb(60, 60, 60);
+            btnLoopbackOn.Click += (s, e) =>
+            {
+                _ctrlDto.LoopbackTest = true;
+                btnLoopbackOn.BackColor = Color.MediumSpringGreen;
+                btnLoopbackOn.ForeColor = Color.Black;
+                btnLoopbackOff.BackColor = Color.FromArgb(60, 60, 60);
+                btnLoopbackOff.ForeColor = Color.White;
+                SendControlMessage();
+            };
+            pnlLoopback.Controls.Add(btnLoopbackOn);
+
+            btnLoopbackOff.BackColor = Color.FromArgb(60, 60, 60);
+            btnLoopbackOff.Click += (s, e) =>
+            {
+                _ctrlDto.LoopbackTest = false;
+                btnLoopbackOff.BackColor = Color.Crimson;
+                btnLoopbackOff.ForeColor = Color.White;
+                btnLoopbackOn.BackColor = Color.FromArgb(60, 60, 60);
+                btnLoopbackOn.ForeColor = Color.White;
+                SendControlMessage();
+            };
+            pnlLoopback.Controls.Add(btnLoopbackOff);
+
+            lblEthLoops = new Label[2];
+            lblEthLoops[0] = CreateLedStatus("Eth_CM", 400, 50, pnlLoopback);
+            lblEthLoops[1] = CreateLedStatus("Eth_PC", 630, 50, pnlLoopback);
 
             // Add to MainLayout (pnlComm already added above)
             mainLayout.SetColumnSpan(pnlComm, 2);
             mainLayout.Controls.Add(pnlStatus, 0, 1);
             mainLayout.Controls.Add(pnlCtrls, 0, 2);
             mainLayout.Controls.Add(pnlEep, 1, 2);
+            mainLayout.Controls.Add(pnlLoopback, 0, 3);
+            mainLayout.SetColumnSpan(pnlLoopback, 2);
 
-            // Set up Real-Time Log Panel (Row 3, Spans 3 columns)
+            // Set up Real-Time Log Panel (Row 4, Spans 3 columns)
             Panel pnlLog = CreateStyledPanel("REAL-TIME LOG MONITOR");
             pnlLog.Dock = DockStyle.Fill;
             pnlLog.Margin = new Padding(5);
@@ -366,7 +406,7 @@ namespace TR28386_T_PC
             // Assign dynamic location for button in Resize
             pnlLog.Resize += (s, e) => { btnLogDetail.Location = new Point(pnlLog.Width - 330, 45); };
 
-            mainLayout.Controls.Add(pnlLog, 0, 3);
+            mainLayout.Controls.Add(pnlLog, 0, 4);
             mainLayout.SetColumnSpan(pnlLog, 3);
 
             // Set up Graph Panel (RowSpan = 3, Column = 2)
@@ -443,7 +483,7 @@ namespace TR28386_T_PC
             }
 
             mainLayout.Controls.Add(pnlGraph, 2, 0);
-            mainLayout.SetRowSpan(pnlGraph, 3);
+            mainLayout.SetRowSpan(pnlGraph, 4); // 그래프가 Row 0~3까지 총 4줄을 차지하도록 확장
 
             this.Controls.Add(mainLayout);
 
@@ -730,6 +770,9 @@ namespace TR28386_T_PC
 
                 UpdateGraphData(data.PWMRaw, data.PWMRCLPF, data.PWMBWLPF, data.PotenRAW, data.PotenMAVE);
 
+                UpdateLedStatus(lblEthLoops[0], data.EthLoop1);
+                UpdateLedStatus(lblEthLoops[1], data.EthLoop2);
+
                 // if reading EEPROM requested and responded
                 if (_awaitingEepReadResponse)
                 {
@@ -746,12 +789,19 @@ namespace TR28386_T_PC
 
         private void Timer_Tick(object sender, EventArgs e)
         {
-            // Clear receiving indication if no data arrived in last 500ms
+            // 1. 주기적 제어 메시지 전송 (10ms)
+            if (_protocol.IsConnected)
+            {
+                SendControlMessage();
+            }
+
+            // 2. 통신 수신 인디케이터 관리 (500ms 무응답 시 회색)
             if ((DateTime.Now - _lastRxTime).TotalMilliseconds > 500)
             {
                 lblCommReceiving.ForeColor = Color.Gray;
             }
 
+            // 3. 그래프 갱신
             if (!_isGraphPaused && _graphIndex > 0)
             {
                 _formsPlot.Plot.SetAxisLimits(xMin: 0, xMax: GRAPH_MAX_POINTS, yMin: -0.1, yMax: 3.6);
@@ -826,6 +876,22 @@ namespace TR28386_T_PC
                 {
                     if (c is Label || c is TextBox) c.ForeColor = targetColor;
                     if (c is Button) { c.Enabled = !isCanMode; c.ForeColor = isCanMode ? inactiveColor : Color.White; }
+                }
+            }
+
+            // 2-1. Loopback Panel disable
+            var loopbackPanels = this.Controls.Find("pnlLoopback", true);
+            if (loopbackPanels.Length > 0)
+            {
+                Panel pnlLoopback = loopbackPanels[0] as Panel;
+                if (pnlLoopback != null)
+                {
+                    pnlLoopback.Enabled = !isCanMode;
+                    foreach (Control c in pnlLoopback.Controls)
+                    {
+                        if (c is Label) c.ForeColor = targetColor;
+                        if (c is Button) { c.Enabled = !isCanMode; c.ForeColor = isCanMode ? inactiveColor : Color.White; }
+                    }
                 }
             }
 

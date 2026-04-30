@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_SCI_PC.h
     Description      : PC Interface Communication (SCI_PC) Protocol Definition
-    Last Updated     : 2026. 04. 17.
+    Last Updated     : 2026. 04. 30. (루프백 결과 비트 추가)
 **********************************************************************/
 
 #ifndef CSU_SCI_PC_H
@@ -37,7 +37,8 @@ typedef union {
         bool EepWrite:1u;     // Bit 8: EEPROM Write Enable
         bool EepRead:1u;     // Bit 9: EEPROM Read Enable
         bool Epwm7aEn:1u;     // Bit 10: Epwm7a Enable
-        uint16_t Reserved:5u; // Bit 11-15: Reserved
+        bool LoopbackTest:1u; // Bit 11: Ethernet Loopback Test
+        uint16_t Reserved:4u; // Bit 12-15: Reserved
     } bit;
 } uSciPcCmd;
 
@@ -67,7 +68,9 @@ typedef struct
     /* --- 2. 상태 및 에러 플래그 (Status - 1 byte) --- */
     bool              Tact01:1u;     // Bit 0: 스위치 1
     bool              Tact02:1u;      // Bit 1: 스위치 2
-    uint16_t          Reserved:6u; // Bit 3-7: Reserved
+    bool              EthLoop1:1u;    // Bit 2: 이더넷 루프백 결과 1
+    bool              EthLoop2:1u;    // Bit 3: 이더넷 루프백 결과 2
+    uint16_t          Reserved:4u; // Bit 4-7: Reserved
 
     /* --- 3. 데이터 필드 (14 bytes) --- */
     uint16_t          EncoderAngle;   // Buf[2~3]
@@ -99,6 +102,10 @@ void recvSciPcMessage(uint16_t ID, uint16_t Data[]);
  */
 void sendSciPcMessage1(void);
 
-#endif	// #ifndef CSU_SCI_PC_H
+/**
+ * @brief 루프백 테스트 명령 업데이트
+ */
+void updateLoopbackTest(void);
 
+#endif	// #ifndef CSU_SCI_PC_H
 

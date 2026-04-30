@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_SCI_PC.c
     Description      : PC Interface Communication (SCI_PC) Protocol Definition
-    Last Updated     : 2026. 04. 17.
+    Last Updated     : 2026. 04. 30. (루프백 상태 동기화 추가)
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -62,9 +62,15 @@ void recvSciPcMessage(uint16_t ID, uint16_t Data[])
         /* 4. EepromWriteVal 저장 (1 byte) */
         xRcvSciPcMsg1.EepromWriteVal = (uint16_t)(Data[pos++] & 0xFFu); // Row 9
 
-        /* 5. Epwm7aDuty & Freq 저장 */
         xRcvSciPcMsg1.Epwm7aDuty = (uint16_t)(Data[pos++] & 0xFFu); // Row 10
         xRcvSciPcMsg1.Epwm7aFreq = (uint16_t)(Data[pos++] & 0xFFu); // Row 11
+
+        /* 6. 루프백 테스트 활성화 시, PC 메시지 수신마다 CM 코어에 테스트 명령 전달 (10ms 주기 대응) */
+        if (xRcvSciPcMsg1.Command.bit.LoopbackTest == 1)
+        {
+            sendIpcMessageToCM(0x10, 0, 0); // IPC_CMD_LOOPBACK_ON
+        }
+
 
     break;
     
@@ -100,6 +106,8 @@ void sendSciPcMessage1(void)
     on16.u16 = 0u; // 필수: 쓰레기 값 방지
     on16.u16 |= (xXmtSciPcMsg1.Tact01 == true ? 1u : 0u) << 0u; // D0
     on16.u16 |= (xXmtSciPcMsg1.Tact02 == true ? 1u : 0u) << 1u; // D1
+    on16.u16 |= (xLed.led01.State == true ? 1u : 0u) << 2u;     // D2: EthLoop1
+    on16.u16 |= (xLed.led02.State == true ? 1u : 0u) << 3u;     // D3: EthLoop2
     // Reserved 는 자동으로 0
     Buf[pos++] = (on16.u16 & 0xFFu);
 
@@ -154,4 +162,24 @@ void sendSciPcMessage1(void)
 
     /* 8. 최종 전송 (pos는 현재 21) */
     xmtScib_SCI_PC(Buf, pos);
+}
+
+/**
+ * @brief 루프백 테스트 명령 상태 확인 및 IPC 전송
+ */
+void updateLoopbackTest(void)
+{
+    static bool prevLoopbackState = false;
+    bool currState = (bool)xRcvSciPcMsg1.Command.bit.LoopbackTest;
+    
+    // 상태가 ON -> OFF로 변할 때만 CM 코어에 중지 알림 (주기적 트리거는 recvSciPcMessage에서 처리)
+    if (currState != prevLoopbackState)
+    {
+        if (currState == false)
+        {
+            // Turn OFF loopback test
+            sendIpcMessageToCM(0x11, 0, 0); // IPC_CMD_LOOPBACK_OFF
+        }
+        prevLoopbackState = currState;
+    }
 }

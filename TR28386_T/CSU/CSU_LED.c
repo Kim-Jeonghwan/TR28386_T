@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_LED.c
     Description      : System Status LED Control (Green / Orange)
-    Last Updated     : 2026. 04. 17.
+    Last Updated     : 2026. 04. 30.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -144,8 +144,11 @@ void updateLedStatus(void)
 
     // 2. SCI_PC 메시지 데이터를 구조체 상태값으로 동기화 (기존 updateGpioLed 기능 통합)
     // 토글 모드가 아닐 때만 SCI_PC 메시지 값을 반영하도록 설계하는 것이 안전합니다.
-    xLed.led01.State = (bool)xRcvSciPcMsg1.Command.bit.LED01;
-    xLed.led02.State = (bool)xRcvSciPcMsg1.Command.bit.LED02;
+    if(xRcvSciPcMsg1.Command.bit.LoopbackTest == 0)
+    {
+        xLed.led01.State = (bool)xRcvSciPcMsg1.Command.bit.LED01;
+        xLed.led02.State = (bool)xRcvSciPcMsg1.Command.bit.LED02;
+    }
     xLed.led03.State = (bool)xRcvSciPcMsg1.Command.bit.LED03;
     xLed.led04.State = (bool)xRcvSciPcMsg1.Command.bit.LED04;
     xLed.led05.State = (bool)xRcvSciPcMsg1.Command.bit.LED05;
