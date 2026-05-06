@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : main.c
     Description      : CM Core Main Entry
-    Last Updated     : 2026. 04. 22.
+    Last Updated     : 2026. 05. 06.
 **********************************************************************/
 
 #include "main.h"
@@ -72,19 +72,7 @@ static void Cycle_1ms(void)
 
 static void Cycle_10ms(void)
 {
-    static uint16_t u16ToggleCnt = 0;
-
-    // CM 코어는 카운터를 항상 유지하며, CPU1이 권한을 넘겨준 순간부터 실제 핀에 반영됩니다.
-    u16ToggleCnt++;
-
-    // 10ms * 20 = 200ms (0.2초)
-    if (u16ToggleCnt >= 20)
-    {
-        u16ToggleCnt = 0;
-        
-        // GPIO 31번 상태 반전
-        GPIO_togglePin(31);
-    }
+    // 10ms 작업 내용
 }
 
 static void Cycle_100ms(void)

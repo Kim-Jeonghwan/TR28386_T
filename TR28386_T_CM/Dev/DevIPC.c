@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : DevIPC.c
     Description      : CM Core IPC Device Driver
-    Last Updated     : 2026. 04. 30.
+    Last Updated     : 2026. 05. 06.
 **********************************************************************/
 
 #include "DevIPC.h"
@@ -11,12 +11,12 @@ static __interrupt void isrIpcFromCPU1(void);
 
 void Initial_IPC(void)
 {
-    // 1. IPC 플래그 초기화
-    IPC_clearFlagLtoR(IPC_CM_L_CPU1_R, IPC_FLAG_ALL);
-
-    // 2. CPU1으로부터 수신받을 인터럽트 등록 (CPU1은 FLAG1을 사용하여 명령을 보냄)
-    // CM 측에서 FLAG1에 대응하는 인터럽트 라인을 등록 (IPC_INT1 사용)
+    // 1. CPU1으로부터 수신받을 인터럽트 등록
     IPC_registerInterrupt(IPC_CM_L_CPU1_R, IPC_INT1, isrIpcFromCPU1);
+
+    // 2. Synchronize with CPU1 core
+    // CPU1이 준비될 때까지 대기하며 상호 확인합니다.
+    IPC_sync(IPC_CM_L_CPU1_R, IPC_FLAG31);
 }
 
 static __interrupt void isrIpcFromCPU1(void)
@@ -40,7 +40,6 @@ static __interrupt void isrIpcFromCPU1(void)
 void sendIpcMessageToCPU1(uint32_t command, uint32_t addr, uint32_t data)
 {
     // CPU1은 FLAG0을 모니터링하여 수신함
-    // FLAG0이 사용 중인지 확인
     while(IPC_isFlagBusyLtoR(IPC_CM_L_CPU1_R, IPC_FLAG0) == true)
     {
         // Wait

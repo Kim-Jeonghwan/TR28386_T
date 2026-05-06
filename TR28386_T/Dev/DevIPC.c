@@ -2,31 +2,34 @@
     Nexcom Co., Ltd.
     Filename         : DevIPC.c
     Description      : CM Core IPC Device Driver 및 공유 메모리 설정
-    Last Updated     : 2026. 04. 23.
+    Last Updated     : 2026. 05. 06.
 **********************************************************************/
 
 #include "DevIPC.h"
 
 static __interrupt void isrIpcFromCM(void);
 
+// 1. CM 코어가 사용할 RAM 권한을 부여하는 함수
+void Initial_IPC_Mastership(void)
+{
+    // F2838x에서는 각 RAM 섹션당 2비트를 사용하여 마스터를 지정함 (10b = CM)
+    EALLOW;
+    // Shared RAM (S0~S3) 권한을 CM으로 설정 (0xAA = 10101010b -> S0,S1,S2,S3 모두 CM)
+    HWREG(MEMCFG_BASE + MEMCFG_O_LSXMSEL) = (HWREG(MEMCFG_BASE + MEMCFG_O_LSXMSEL) & ~0x00FFU) | 0x00AAU;
+
+    // GSRAM (GS0~GS1) 권한을 CM으로 설정 (0x0A = 1010b -> GS0, GS1 모두 CM)
+    HWREG(MEMCFG_BASE + MEMCFG_O_GSXMSEL) = (HWREG(MEMCFG_BASE + MEMCFG_O_GSXMSEL) & ~0x000FU) | 0x000AU;
+    EDIS;
+}
+
+// 2. IPC 통신 설정 및 CM 코어와의 동기화 함수
 void Initial_IPC(void)
 {
-    // 1. GSRAM 권한 설정 (CM이 GSRAM 0에 쓸 수 있도록 설정)
-    // F2838x에서는 GSxMSEL 레지스터가 각 GSRAM당 2비트를 사용하여 마스터를 지정합니다.
-    // 00b: CPU1, 01b: CPU2, 10b: CM
-    // 현재 프로젝트의 Driverlib이 1비트 방식(F2837xD 호환)으로 구현되어 있어 직접 레지스터를 설정합니다.
-    EALLOW;
-    HWREG(MEMCFG_BASE + MEMCFG_O_GSXMSEL) = (HWREG(MEMCFG_BASE + MEMCFG_O_GSXMSEL) & ~0x0003U) | 0x0002U;
-    EDIS;
-
-    // 2. IPC 플래그 초기화
-    IPC_clearFlagLtoR(IPC_CPU1_L_CM_R, IPC_FLAG_ALL);
-
-    // 3. CM으로부터 수신받을 인터럽트 등록 (IPC0)
+    // CM으로부터 수신받을 인터럽트 등록 (IPC0)
     IPC_registerInterrupt(IPC_CPU1_L_CM_R, IPC_INT0, isrIpcFromCM);
 
-    // Synchronize with CM core (Optional)
-    // IPC_sync(IPC_CPU1_L_CM_R, IPC_FLAG31);
+    // Synchronize with CM core
+    IPC_sync(IPC_CPU1_L_CM_R, IPC_FLAG31);
 }
 
 static __interrupt void isrIpcFromCM(void)

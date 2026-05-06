@@ -8,7 +8,7 @@
 	Description		: 
 	Tracebility		: 
 	Programmer	    :
-	Last Updated	: 2026. 04. 22.
+	Last Updated	: 2026. 05. 06.
 
 **********************************************************************/
 
@@ -54,6 +54,12 @@ void DSP_Initialization(void)
 	// 시스템 및 주변회로 클럭 설정
 	Device_init();
 
+    // 1. CM 코어가 사용할 Shared RAM 권한을 먼저 부여 (CM의 .data, .bss 초기화에 필수)
+    Initial_IPC_Mastership();
+
+    // 2. CM 코어 부팅 (Reset 해제)
+    Initial_CmCore();
+
 	Initial_GPIO();
 
 	// 주변회로 인터럽트 확장 회로(PIE) 및 관련 레지스터 초기화 / CPU 인터럽트 비-활성화
@@ -64,9 +70,6 @@ void DSP_Initialization(void)
 
 
 	InitialPeripherals();
-
-    // --- CM 코어 부팅 (Reset 해제) ---
-    Initial_CmCore();
 
 	// 실시간 디버깅 활성화, 전역 인터럽트 스위치 ON
 	ERTM;	// Debug Enable Mask 비트 설정 (실시간 디버깅이 가능하도록 ST1 레지스터의 /DBGM 비트를 0으로 클리어)
