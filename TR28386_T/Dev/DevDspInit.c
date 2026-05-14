@@ -189,6 +189,3 @@ static void Initial_CmCore(void)
     Device_bootCM(BOOTMODE_BOOT_TO_S0RAM);
 #endif
 }
-
-
-

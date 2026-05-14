@@ -227,6 +227,3 @@ __interrupt void isr_CpuTimer2(void)
 
 	Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }
-
-
-

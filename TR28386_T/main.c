@@ -139,15 +139,6 @@ static void cycle_10ms(void)
 
 	updateEepromStatus();
 
-    // --- GPIO 1번 상태에 따른 31번 제어권 할당 로직 (10ms 주기) ---
-    if (GPIO_readPin(1) == 0) // GND 입력 시 CM 코어에 권한 할당
-    {
-        GPIO_setMasterCore(31, GPIO_CORE_CM);
-    }
-    else // High 상태에서는 CPU1이 권한 회수
-    {
-        GPIO_setMasterCore(31, GPIO_CORE_CPU1);
-    }
 }
 
 
@@ -164,11 +155,7 @@ static void cycle_10ms(void)
 */
 static void cycle_100ms(void)
 {
-    // GPIO 1번이 GND가 아닐 때만 기존 LED 상태 업데이트 (충돌 방지)
-    if (GPIO_readPin(1) != 0)
-    {
-        updateLedStatus();
-    }
+    updateLedStatus();
 }
 
 
@@ -187,4 +174,3 @@ static void cycle_1000ms(void)
 
 
 }
-

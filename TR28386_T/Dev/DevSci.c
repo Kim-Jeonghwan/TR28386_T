@@ -347,4 +347,3 @@ static uint16_t dequeueSci(stQsci *pstQ, uint16_t *pData)
 
     return result;
 }
-

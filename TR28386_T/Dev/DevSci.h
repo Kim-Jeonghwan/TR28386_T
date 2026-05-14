@@ -83,5 +83,3 @@ void sendScib_SCI_PC(void);
 
 
 #endif	// #ifndef DEVSCI_H
-
-
