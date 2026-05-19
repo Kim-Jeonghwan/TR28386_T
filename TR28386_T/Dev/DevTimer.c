@@ -8,7 +8,7 @@
 	Description		: 
 	Tracebility		: 
 	Programmer	    :
-	Last Updated	: 2026. 04. 17.
+	Last Updated	: 2026. 05. 15.
 
 **********************************************************************/
 
@@ -182,7 +182,7 @@ __interrupt void isr_CpuTimer0(void)
     // Acknowledge this interrupt to receive more interrupts from group 1
     //
 
-    sendScib_SCI_PC();
+    sendScia_SCI_PC();
     
     Interrupt_clearACKGroup(INTERRUPT_ACK_GROUP1);
 }

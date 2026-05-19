@@ -2,7 +2,7 @@
     Nexcom Co., Ltd.
     Filename         : CSU_SCI_PC.c
     Description      : PC Interface Communication (SCI_PC) Protocol Definition
-    Last Updated     : 2026. 04. 30. (루프백 상태 동기화 추가)
+    Last Updated     : 2026. 05. 15.
 **********************************************************************/
 
 /* ************************** [[   include  ]]  *********************************************************** */
@@ -161,7 +161,7 @@ void sendSciPcMessage1(void)
 
 
     /* 8. 최종 전송 (pos는 현재 21) */
-    xmtScib_SCI_PC(Buf, pos);
+    xmtScia_SCI_PC(Buf, pos);
 }
 
 /**
